@@ -1,7 +1,17 @@
 pipeline {
     agent any
     stages {
-        stage('Checkout') { steps { checkout scm } }
+        stage('Setup') {
+            tools {
+                jdk "JDK21"
+                maven "Maven3"
+            }
+        }
+        stage('Checkout') { 
+            steps { 
+                checkout scm 
+            } 
+        }
         stage('Build') {
             steps {
                 sh 'mvn -B clean package'
