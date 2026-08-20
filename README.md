@@ -5,3 +5,4 @@ We decided to go with git flow branching strategy because we expect to have many
 Group Members:
 GF
 MB
+Ian Gill
