@@ -4,8 +4,13 @@
 We decided to go with git flow branching strategy because we expect to have many features, scheduled releases, and it is safer than pushing straight to main. 
 
 
-# Group Members:
+## Group Members:
 - Giulia Fattori
 - Myroslava Bunciuc
 - Ian Gill
 - Louise Deeth
+
+## Running the application:
+
+1. Clone the repository.
+2. Run 'mvn clean package' to compile
