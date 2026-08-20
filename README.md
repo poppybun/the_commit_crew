@@ -3,6 +3,6 @@ We decided to go with git flow branching strategy because we expect to have many
 
 
 Group Members:
-GF
+Giulia Fattori
 MB
 Ian Gill
