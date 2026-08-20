@@ -1,12 +1,10 @@
 pipeline {
     agent any
-    stages {
-        stage('Setup') {
-            tools {
-                jdk "JDK21"
-                maven "Maven3"
-            }
-        }
+    tools {
+        jdk "JDK21"
+        maven "Maven3"
+    }
+    stages {  
         stage('Checkout') { 
             steps { 
                 checkout scm 
