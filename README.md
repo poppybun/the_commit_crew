@@ -33,7 +33,7 @@ docker build -t the-commit-crew .
 ```bash
 docker run -d -p 8081:8080 --name the-commit-crew the-commit-crew:latest
 ```
-5. Check containder exists and note the id:
+5. Check container exists and note the id:
 ```bash
 docker ps -a
 ```
