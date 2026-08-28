@@ -16,15 +16,20 @@ pipeline {
             }
         }
         stage('Build Image') {
-            steps { sh 'docker build -t the-commit-crew .' }
+            steps { sh 'docker build -t the-commit-crew:${BUILD_NUMBER} .' }
         }
         stage('Smoke Test') {
-            steps { sh 'docker run --rm the-commit-crew' }
+            steps { sh 'docker run --rm the-commit-crew:${BUILD_NUMBER}' }
         }
         stage('Archive') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
+        stage('Test') {
+            steps { sh 'mvn -B test' }
+                post { always { junit 'target/surefire-reports/*.xml' } }
+        }
+
     }
 }
