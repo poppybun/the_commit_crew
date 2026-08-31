@@ -24,7 +24,7 @@ CREATE TABLE accounts (
 
 -- Positions table
 CREATE TABLE positions (
-    account_id      INTEGER NOT NULL REFERENCES accounts(account_id),
+    account_id      VARCHAR(32) NOT NULL REFERENCES accounts(account_id),
     symbol          TEXT NOT NULL REFERENCES instruments(symbol),
     quantity        NUMERIC(14,4) NOT NULL,
     average_cost    NUMERIC(14,4) NOT NULL
@@ -32,7 +32,7 @@ CREATE TABLE positions (
 
 CREATE TABLE orders (
     order_id     SERIAL PRIMARY KEY,
-    account_id   INTEGER NOT NULL REFERENCES accounts(account_id),
+    account_id   VARCHAR(32) NOT NULL REFERENCES accounts(account_id),
     symbol       TEXT NOT NULL REFERENCES instruments(symbol),
     side         TEXT NOT NULL CHECK (side IN ('BUY', 'SELL')),
     quantity     NUMERIC(14,4) NOT NULL,
