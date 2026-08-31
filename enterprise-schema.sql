@@ -24,6 +24,7 @@ CREATE TABLE accounts (
 
 -- Positions table
 CREATE TABLE positions (
+    position_id     SERIALPRIMARY KEY,
     account_id      VARCHAR(32) NOT NULL REFERENCES accounts(account_id),
     symbol          TEXT NOT NULL REFERENCES instruments(symbol),
     quantity        NUMERIC(14,4) NOT NULL,
