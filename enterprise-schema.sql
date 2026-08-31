@@ -31,13 +31,15 @@ CREATE TABLE positions (
 );
 
 CREATE TABLE orders (
-    order_id       SERIAL PRIMARY KEY,
-    account_id     INTEGER NOT NULL REFERENCES accounts(account_id),
-    instrument_id  INTEGER NOT NULL REFERENCES instruments(instrument_id),
-    order_type     TEXT NOT NULL CHECK (order_type IN ('BUY', 'SELL')),
-    quantity       NUMERIC(14,4) NOT NULL,
-    price          NUMERIC(14,4),
-    order_date     DATE NOT NULL
+    order_id     SERIAL PRIMARY KEY,
+    account_id   INTEGER NOT NULL REFERENCES accounts(account_id),
+    symbol       TEXT NOT NULL REFERENCES instruments(symbol),
+    side         TEXT NOT NULL CHECK (side IN ('BUY', 'SELL')),
+    quantity     NUMERIC(14,4) NOT NULL,
+    price        NUMERIC(14,4),
+    status       TEXT NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED')),
+    idempotency_key TEXT UNIQUE,
+    created_on    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Seed data ------------------------------------------------------------
