@@ -11,20 +11,22 @@ CREATE TABLE instruments (
     currency       TEXT NOT NULL
 );
 
+-- Accounts table
 CREATE TABLE accounts (
-    id            SERIAL PRIMARY KEY,
-    account_id    SERIAL UNIQUE NOT NULL,
-    client_id     INTEGER NOT NULL REFERENCES clients(client_id),
-    account_type  TEXT NOT NULL CHECK (account_type IN ('ISA', 'GIA', 'SIPP')),
-    opened_date   DATE NOT NULL,
-    currency      TEXT NOT NULL
+    id              SERIAL BIGINT PRIMARY KEY,
+    account_id      VARCHAR(32) UNIQUE NOT NULL,
+    holder_name     VARCHAR(255) NOT NULL,
+    cash_balance    NUMERIC(18,2) NOT NULL,
+    status          VARCHAR(20) NOT NULL,
+    version         INTEGER DEFAULT 0,
+    last_updated    TIMESTAMP DEFAULT NOW()
 );
 
 -- Positions table
 CREATE TABLE positions (
-    account_id     INTEGER NOT NULL REFERENCES accounts(account_id),
-    symbol         TEXT NOT NULL REFERENCES instruments(symbol),
-    quantity       NUMERIC(14,4) NOT NULL,
+    account_id      INTEGER NOT NULL REFERENCES accounts(account_id),
+    symbol          TEXT NOT NULL REFERENCES instruments(symbol),
+    quantity        NUMERIC(14,4) NOT NULL,
     average_cost    NUMERIC(14,4) NOT NULL
 );
 
