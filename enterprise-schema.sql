@@ -13,7 +13,7 @@ CREATE TABLE instruments (
 
 -- Accounts table
 CREATE TABLE accounts (
-    id              SERIAL BIGINT PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     account_id      VARCHAR(32) UNIQUE NOT NULL,
     holder_name     VARCHAR(255) NOT NULL,
     cash_balance    NUMERIC(18,2) NOT NULL,
