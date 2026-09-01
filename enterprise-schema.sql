@@ -1,7 +1,7 @@
-DROP TABLE IF EXISTS instruments;
 DROP TABLE IF EXISTS positions;
-DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS instruments;
+DROP TABLE IF EXISTS accounts;
 
 CREATE TABLE instruments (
     instrument_id  SERIAL PRIMARY KEY,
