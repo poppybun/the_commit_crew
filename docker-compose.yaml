@@ -7,8 +7,9 @@ services:
   db:
     build: ./docs/
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-the-commit-crew-dev}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-n3u3d4!}
+    # Use the values from the .env file in the same folder, and fail if they are not set.
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
     ports:
       - "5432:5432"
     volumes:
