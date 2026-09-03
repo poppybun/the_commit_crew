@@ -21,27 +21,45 @@ Linux:
 ```bash
 git clone git@github.com:poppybun/the_commit_crew.git
 ```
-2. Run:
+2. The databases (the-commit-crew-prod & the-commit-crew-dev) can be connected to through pgAdmin.
+Steps 3-5 outline how to run a copy of either database locally and can be skipped.
+
+3. To run copies of the databases locally, create .env.dev and .env.prod files in the root directory of the project.
+They should look something like this:
+
+.env.dev:
 ```bash
-mvn clean package
-```
-3. Create docker image:
-```bash 
-docker build -t the-commit-crew .
-```
-4. Run the container:
-```bash
-docker run -d -p 8081:8080 --name the-commit-crew the-commit-crew:latest
-```
-5. Check container exists and note the id: 
-```bash
-docker ps -a
-```
-6. Check the logs for the output: 
-```bash
-docker logs <containerID>
+POSTGRES_DB=the-commit-crew-dev
+POSTGRES_PASSWORD=<db password here>
 ```
 
+.env.prod:
+```bash
+POSTGRES_DB=the-commit-crew-prod
+POSTGRES_PASSWORD=<db password here>
+```  
+
+4. Run docker-compose:<br />
+dev:
+```bash 
+docker-compose -p commitcrew-dev  --env-file .env.dev  up -d --build
+```
+prod:
+```bash 
+docker-compose -p commitcrew-prod --env-file .env.prod up -d --build
+```
+
+5. Verify: <br />
+dev:
+```bash
+docker-compose -p commitcrew-dev  --env-file .env.dev  exec db psql -U postgres -d the-commit-crew-dev  -c "\dt"
+```
+
+prod:
+```bash
+docker-compose -p commitcrew-prod --env-file .env.prod exec db psql -U postgres -d the-commit-crew-prod -c "\dt"
+```
+You should see the list of tables for each database.
 
 ## Jenkins Pipeline available at
 [10.9.75.153:8080](http://10.9.75.153:8080)
