@@ -4,71 +4,58 @@ DROP TABLE IF EXISTS instruments;
 DROP TABLE IF EXISTS accounts;
 
 CREATE TABLE instruments (
-    instrument_id  SERIAL PRIMARY KEY,
-    symbol         TEXT NOT NULL UNIQUE,
+    symbol         VARCHAR(20) PRIMARY KEY CHECK (symbol = upper(symbol)),
     name           TEXT NOT NULL,
     asset_class    TEXT NOT NULL CHECK (asset_class IN ('Equity', 'Bond', 'Fund', 'Cash')),
-    currency       TEXT NOT NULL
+    currency       TEXT NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
+    tradable       BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- Accounts table
 CREATE TABLE accounts (
-    id              BIGSERIAL PRIMARY KEY,
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     account_id      VARCHAR(32) UNIQUE NOT NULL,
     holder_name     VARCHAR(255) NOT NULL,
-    cash_balance    NUMERIC(18,2) NOT NULL,
-    status          VARCHAR(20) NOT NULL,
-    version         INTEGER DEFAULT 0,
+    cash_balance    NUMERIC(18,2) NOT NULL CHECK (cash_balance >= 0),
+    status          VARCHAR(20) NOT NULL CHECK (status IN ('ACTIVE', 'CLOSED', 'SUSPENDED')),
+    version         INT DEFAULT 0,
     last_updated    TIMESTAMP DEFAULT NOW()
 );
 
 -- Positions table
 CREATE TABLE positions (
-    position_id     SERIAL PRIMARY KEY,
-    account_id      VARCHAR(32) NOT NULL REFERENCES accounts(account_id),
-    symbol          TEXT NOT NULL REFERENCES instruments(symbol),
-    quantity        NUMERIC(14,4) NOT NULL,
-    average_cost    NUMERIC(14,4) NOT NULL
+    account_id      VARCHAR(32) NOT NULL,
+    symbol          VARCHAR(20) NOT NULL,
+    quantity        NUMERIC(14,4) NOT NULL CHECK (quantity > 0),
+    average_cost    NUMERIC(14,4) NOT NULL CHECK (average_cost > 0),
+    PRIMARY KEY (account_id, symbol),
+    FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE RESTRICT,
+    FOREIGN KEY (symbol) REFERENCES instruments(symbol) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE orders (
-    order_id     SERIAL PRIMARY KEY,
-    account_id   VARCHAR(32) NOT NULL REFERENCES accounts(account_id),
-    symbol       TEXT NOT NULL REFERENCES instruments(symbol),
-    side         TEXT NOT NULL CHECK (side IN ('BUY', 'SELL')),
-    quantity     NUMERIC(14,4) NOT NULL,
-    price        NUMERIC(14,4),
-    status       TEXT NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED')),
-    idempotency_key TEXT UNIQUE,
-    created_on    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id       VARCHAR(32) NOT NULL,
+    symbol           VARCHAR(20) NOT NULL,
+    side             VARCHAR(4) NOT NULL CHECK (side IN ('BUY', 'SELL')),
+    quantity         INT NOT NULL CHECK (quantity > 0),
+    price            NUMERIC(18,2) NOT NULL CHECK (price > 0),
+    status           VARCHAR(20) NOT NULL CHECK (status IN ('NEW', 'FILLED', 'REJECTED', 'CANCELLED')),
+    created_on       TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE RESTRICT,
+    FOREIGN KEY (symbol) REFERENCES instruments(symbol) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- Seed data ------------------------------------------------------------
 
-INSERT INTO instruments (symbol, name, asset_class, currency) VALUES
-    ('AAPL', 'Apple Inc.', 'Equity', 'USD'),
-    ('MSFT', 'Microsoft Corporation', 'Equity', 'USD'),
-    ('GOOGL', 'Alphabet Inc.', 'Equity', 'USD'),
-    ('US10Y', 'US Treasury 10-Year Note', 'Bond', 'USD'),
-    ('VFIAX', 'Vanguard 500 Index Fund', 'Fund', 'USD'),
-    ('CASH-USD', 'US Dollar Cash', 'Cash', 'USD');
+-- Indexes --
+CREATE INDEX idx_positions_account_id
+    ON positions(account_id);
 
-INSERT INTO accounts (account_id, holder_name, cash_balance, status, version) VALUES
-    ('ACC-1001', 'Alice Johnson', 25000.00, 'ACTIVE', 0),
-    ('ACC-1002', 'Bob Smith', 5400.50, 'ACTIVE', 0),
-    ('ACC-1003', 'Carol Davis', 120000.00, 'ACTIVE', 0),
-    ('ACC-1004', 'David Lee', 0.00, 'CLOSED', 0);
+CREATE INDEX idx_positions_symbol 
+    ON positions(symbol);
 
-INSERT INTO positions (account_id, symbol, quantity, average_cost) VALUES
-    ('ACC-1001', 'AAPL', 50, 150.25),
-    ('ACC-1001', 'US10Y', 10, 98.50),
-    ('ACC-1002', 'MSFT', 20, 310.75),
-    ('ACC-1003', 'GOOGL', 15, 2750.00),
-    ('ACC-1003', 'VFIAX', 100, 420.10);
+CREATE INDEX idx_orders_account_id 
+    ON orders(account_id);
 
-INSERT INTO orders (account_id, symbol, side, quantity, price, status, idempotency_key) VALUES
-    ('ACC-1001', 'AAPL', 'BUY', 50, 150.25, 'COMPLETED', 'idem-0001'),
-    ('ACC-1002', 'MSFT', 'BUY', 20, 310.75, 'COMPLETED', 'idem-0002'),
-    ('ACC-1003', 'GOOGL', 'BUY', 15, 2750.00, 'COMPLETED', 'idem-0003'),
-    ('ACC-1001', 'AAPL', 'SELL', 10, 155.00, 'PENDING', 'idem-0004'),
-    ('ACC-1002', 'MSFT', 'BUY', 5, 305.00, 'CANCELLED', 'idem-0005');
+CREATE INDEX idx_orders_symbol 
+    ON orders(symbol);
