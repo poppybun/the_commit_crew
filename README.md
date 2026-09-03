@@ -39,7 +39,7 @@ POSTGRES_DB=the-commit-crew-prod
 POSTGRES_PASSWORD=<db password here>
 ```  
 
-4. Run docker-compose:
+4. Run docker-compose:<br />
 dev:
 ```bash 
 docker-compose -p commitcrew-dev  --env-file .env.dev  up -d --build
@@ -49,7 +49,7 @@ prod:
 docker-compose -p commitcrew-prod --env-file .env.prod up -d --build
 ```
 
-5. Verify:
+5. Verify: <br />
 dev:
 ```bash
 docker-compose -p commitcrew-dev  --env-file .env.dev  exec db psql -U postgres -d the-commit-crew-dev  -c "\dt"
