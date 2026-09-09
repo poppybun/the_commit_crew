@@ -7,7 +7,7 @@ services:
       - "8081:8080"
 
   db:
-    build: ./docs/
+    build: ./db/
     environment:
     # Use the values from the .env file in the same folder, and fail if they are not set.
       POSTGRES_DB: ${POSTGRES_DB:?}
@@ -16,6 +16,7 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d/db
 
 volumes:
   db_data:

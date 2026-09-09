@@ -8,9 +8,9 @@ RUN echo "host all all 10.9.0.0/16 scram-sha-256" >> /usr/share/postgresql/5432/
 RUN echo '#!/bin/bash\necho "host all all 10.9.0.0/16 scram-sha-256" >> "$PGDATA/pg_hba.conf"' > /docker-entrypoint-initdb.d/01-restrict-ip.sh \
     && chmod +x /docker-entrypoint-initdb.d/01-restrict-ip.sh
 
-ARG SCHEMA_PATH=the-commit-crew-schema.sql
+ARG SCHEMA_PATH=init-db.sql
 
-COPY ${SCHEMA_PATH} /docker-entrypoint-initdb.d/02-the-commit-crew-schema.sql
+COPY ${SCHEMA_PATH} /docker-entrypoint-initdb.d/init-db.sql
 
 VOLUME /var/lib/postgresql/data
 
