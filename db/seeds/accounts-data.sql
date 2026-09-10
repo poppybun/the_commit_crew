@@ -3,4 +3,5 @@ INSERT INTO accounts (account_id, holder_name, cash_balance, status, version) VA
     ('ACC-1002', 'Bob Smith', 5400.50, 'ACTIVE', 0),
     ('ACC-1003', 'Carol Davis', 120000.00, 'ACTIVE', 0),
     ('ACC-1004', 'David Lee', 0.00, 'CLOSED', 0),
-    ('ACC-1005', 'Test Lee', 0.00, 'ACTIVE', 0);
+    ('ACC-1005', 'Test Lee', 0.00, 'ACTIVE', 0),
+    ('ACC-1006', 'Test Update', 10.00, 'ACTIVE', 0);
