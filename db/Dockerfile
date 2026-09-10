@@ -1,6 +1,6 @@
 FROM postgres:15
 
-ENV POSTGRES_PASSWORD=my_secure_password
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 RUN echo "host all all 10.9.0.0/16 scram-sha-256" >> /usr/share/postgresql/5432/pg_hba.conf.sample \
     && echo "host all all 10.9.0.0/16 scram-sha-256" >> /var/lib/postgresql/data/pg_hba.conf || true
