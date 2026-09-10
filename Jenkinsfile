@@ -18,6 +18,99 @@ pipeline {
         stage('Build Image') {
             steps { sh 'docker build -t the-commit-crew:${BUILD_NUMBER} .' }
         }
+        stage('Start Database') {
+            steps {
+                script {
+                    // Determine environment based on branch
+                    def environment = 'dev'
+                    if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
+                        environment = 'prod'
+                    }
+                    echo "Starting ${environment} database environment..."
+                    
+                    // Load environment-specific .env file
+                    sh """
+                        set -e
+                        
+                        # Determine which .env file to use
+                        ENV_FILE=".env.${environment}"
+                        if [ ! -f "\${ENV_FILE}" ]; then
+                            echo "ERROR: \${ENV_FILE} not found!"
+                            exit 1
+                        fi
+                        echo "Loading environment from: \${ENV_FILE}"
+                        
+                        # Start database container with environment-specific configuration
+                        docker-compose --env-file "\${ENV_FILE}" up -d db
+                        
+                        # Wait for PostgreSQL to be ready (max 60 seconds)
+                        echo "Waiting for PostgreSQL to be ready..."
+                        for i in {1..12}; do
+                            if docker-compose exec -T db pg_isready -U postgres > /dev/null 2>&1; then
+                                echo "PostgreSQL is ready!"
+                                break
+                            fi
+                            echo "Attempt \$i/12: Waiting for database..."
+                            sleep 5
+                        done
+                        
+                        # Verify the connection works
+                        docker-compose exec -T db psql -U postgres -c "SELECT version();" | head -1
+                    """
+                }
+            }
+            post {
+                failure {
+                    sh 'docker-compose logs db || true'
+                }
+            }
+        }
+        stage('Update Database') {
+            when {
+                // Only run if database-related files changed
+                changeset glob: "db/**"
+            }
+            steps {
+                script {
+                    // Determine environment based on branch
+                    def environment = 'dev'
+                    if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
+                        environment = 'prod'
+                    }
+                    echo "Updating database data for ${environment} environment..."
+                    
+                    sh """
+                        set -e
+                        
+                        ENV_FILE=".env.${environment}"
+                        
+                        # Check if update-data.sql exists
+                        if [ ! -f "db/update-data.sql" ]; then
+                            echo "WARN: db/update-data.sql not found, skipping data update"
+                            exit 0
+                        fi
+                        
+                        echo "Running database update script..."
+                        
+                        # Read POSTGRES_DB and POSTGRES_PASSWORD from .env file
+                        POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE}" | cut -d'=' -f2)
+                        POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE}" | cut -d'=' -f2)
+                        
+                        # Run the update script
+                        docker-compose exec -T \
+                            -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
+                            db psql -U postgres -d "\${POSTGRES_DB}" -f /docker-entrypoint-initdb.d/db/update-data.sql
+                        
+                        echo "Database update completed successfully"
+                    """
+                }
+            }
+            post {
+                failure {
+                    sh 'docker-compose logs db || true'
+                }
+            }
+        }
         stage('Smoke Test') {
             steps { sh 'docker run --rm the-commit-crew:${BUILD_NUMBER}' }
         }
