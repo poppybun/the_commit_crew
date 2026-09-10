@@ -68,7 +68,7 @@ pipeline {
         stage('Update Database') {
         when {
             // Only run if database-related files changed
-            changeset glob: "db/**"
+            changeset pattern: "db/**"
         }
         steps {
             script {
