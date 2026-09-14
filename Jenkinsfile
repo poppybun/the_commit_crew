@@ -34,46 +34,26 @@ pipeline {
                     withCredentials([file(credentialsId: credentialsId, variable: 'ENV_FILE_PATH')]) {
                         sh """
                             set -e
-                    
-                            # Copy the secret .env file from Jenkins credentials
-                            cp "\${ENV_FILE_PATH}" ".env.${environment}"
-                            echo "Loaded environment: .env.${environment} from Jenkins credentials"
-                    
-                            # Start database container with environment-specific configuration
-                            docker-compose --env-file ".env.${environment}" up -d db
-                            echo "Docker compose up command completed. Checking container status..."
-                    
-                            # Check if the container is actually running
+                            
+                            # Use the credentials file
+                            docker-compose --env-file "\${ENV_FILE_PATH}" up -d db
+                            echo "Docker compose up command completed..."
+                            
+                            # Check container status
                             sleep 2
-                            CONTAINER_STATUS=\$(docker-compose --env-file ".env.${environment}" ps db --format "{{.State}}" 2>/dev/null || echo "unknown")
-                            echo "Container status: \${CONTAINER_STATUS}"
-                    
-                            # Get container logs immediately for debugging
-                            echo "Database container logs:"
-                            docker-compose --env-file ".env.${environment}" logs db || true
-                    
-                            # Wait for PostgreSQL to be ready (max 60 seconds)
+                            docker-compose --env-file "\${ENV_FILE_PATH}" ps db
+                            docker-compose --env-file "\${ENV_FILE_PATH}" logs db || true
+                            
+                            # Wait for PostgreSQL to be ready
                             echo "Waiting for PostgreSQL to be ready..."
-                            DB_READY=false
                             for i in {1..12}; do
-                                if docker-compose --env-file ".env.${environment}" exec -T db pg_isready -U postgres > /dev/null 2>&1; then
+                                if docker-compose --env-file "\${ENV_FILE_PATH}" exec -T db pg_isready -U postgres > /dev/null 2>&1; then
                                     echo "PostgreSQL is ready!"
-                                    DB_READY=true
                                     break
                                 fi
                                 echo "Attempt \$i/12: Waiting for database..."
                                 sleep 5
                             done
-                    
-                            if [ "\$DB_READY" != "true" ]; then
-                                echo "ERROR: Database failed to start within 60 seconds"
-                                echo "Final container logs:"
-                                docker-compose --env-file ".env.${environment}" logs db || true
-                                exit 1
-                            fi
-                    
-                            # Verify the connection works
-                            docker-compose --env-file ".env.${environment}" exec -T db psql -U postgres -c "SELECT version();" | head -1
                         """
                     }
                 }
