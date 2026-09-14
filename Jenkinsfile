@@ -96,12 +96,11 @@ pipeline {
                             # Read POSTGRES_DB and POSTGRES_PASSWORD from .env file
                             POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
                             POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
-                            
-                            # Run the update script
-                            docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
+
+                            # Run the update script by piping file content to psql
+                            cat db/update-data.sql | docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
                                     -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                    db psql -U postgres -d "\${POSTGRES_DB}" -f /docker-entrypoint-initdb.d/db/update-data.sql
-                        
+                                    db psql -U postgres -d "\${POSTGRES_DB}"
                                 echo "Database update completed successfully"
                         """
                     }
