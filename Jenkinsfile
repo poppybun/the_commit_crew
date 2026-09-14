@@ -21,30 +21,26 @@ pipeline {
         stage('Start Database') {
             steps {
                 script {
-                    // Determine environment based on branch
                     def environment = 'dev'
                     if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
                         environment = 'prod'
                     }
                     echo "Starting ${environment} database environment..."
             
-                    // Use Jenkins Credentials to access .env files
                     def credentialsId = (environment == 'prod') ? 'env-prod-file' : 'env-dev-file'
             
                     withCredentials([file(credentialsId: credentialsId, variable: 'ENV_FILE_PATH')]) {
                         sh """
                             set -e
                             
-                            # Use the credentials file
+                            docker-compose --env-file "\${ENV_FILE_PATH}" down db || true
                             docker-compose --env-file "\${ENV_FILE_PATH}" up -d db
                             echo "Docker compose up command completed..."
                             
-                            # Check container status
                             sleep 2
                             docker-compose --env-file "\${ENV_FILE_PATH}" ps db
                             docker-compose --env-file "\${ENV_FILE_PATH}" logs db || true
                             
-                            # Wait for PostgreSQL to be ready
                             echo "Waiting for PostgreSQL to be ready..."
                             for i in {1..12}; do
                                 if docker-compose --env-file "\${ENV_FILE_PATH}" exec -T db pg_isready -U postgres > /dev/null 2>&1; then
@@ -54,6 +50,16 @@ pipeline {
                                 echo "Attempt \$i/12: Waiting for database..."
                                 sleep 5
                             done
+                            
+                            # Initialize database schema, indexes, and seed data
+                            echo "Initializing database..."
+                            POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
+                            POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
+                            
+                            cat db/init-db.sql | docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
+                                    -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
+                                    db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}"
+                            echo "Database initialization completed"
                         """
                     }
                 }
