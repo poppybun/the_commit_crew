@@ -1,6 +1,6 @@
 -- DROP TABLE IF EXISTS accounts;
 
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     account_id      VARCHAR(32) UNIQUE NOT NULL,
     holder_name     VARCHAR(255) NOT NULL,

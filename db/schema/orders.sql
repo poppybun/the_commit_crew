@@ -1,6 +1,6 @@
 -- DROP TABLE IF EXISTS orders;
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id       VARCHAR(32) NOT NULL,
     symbol           VARCHAR(20) NOT NULL,
