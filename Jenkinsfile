@@ -65,47 +65,44 @@ pipeline {
             }
         }
         stage('Update Database') {
-        when {
-            // Only run if database-related files changed
-            changeset pattern: "db/**"
-        }
-        steps {
-            script {
-                // Determine environment based on branch
-                def environment = 'dev'
-                if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
-                    environment = 'prod'
-                }
-                echo "Updating database data for ${environment} environment..."
-                
-                // Use Jenkins Credentials to access .env files
-                def credentialsId = (environment == 'prod') ? 'env-prod-file' : 'env-dev-file'
-                
-                withCredentials([file(credentialsId: credentialsId, variable: 'ENV_FILE_PATH')]) {
-                    sh """
-                        set -e
-                        
-                        # Copy the secret .env file from Jenkins credentials
-                        cp "\${ENV_FILE_PATH}" ".env.${environment}"
-                        
-                        # Check if update-data.sql exists
-                        if [ ! -f "db/update-data.sql" ]; then
-                            echo "WARN: db/update-data.sql not found, skipping data update"
-                            exit 0
-                        fi
-                        
-                        echo "Running database update script..."
-                        
-                        # Read POSTGRES_DB and POSTGRES_PASSWORD from .env file
-                        POSTGRES_DB=\$(grep "^POSTGRES_DB=" ".env.${environment}" | cut -d'=' -f2)
-                        POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" ".env.${environment}" | cut -d'=' -f2)
-                        
-                        # Run the update script
-                        docker-compose --env-file ".env.${environment}" exec -T \
-                                -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                db psql -U postgres -d "\${POSTGRES_DB}" -f /docker-entrypoint-initdb.d/db/update-data.sql
+            when {
+                // Only run if database-related files changed
+                changeset pattern: "db/**"
+            }
+            steps {
+                script {
+                    // Determine environment based on branch
+                    def environment = 'dev'
+                    if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
+                        environment = 'prod'
+                    }
+                    echo "Updating database data for ${environment} environment..."
                     
-                            echo "Database update completed successfully"
+                    // Jenkins Credentials 
+                    def credentialsId = (environment == 'prod') ? 'env-prod-file' : 'env-dev-file'
+                    
+                    withCredentials([file(credentialsId: credentialsId, variable: 'ENV_FILE_PATH')]) {
+                        sh """
+                            set -e
+                            
+                            # Check if update-data.sql exists
+                            if [ ! -f "db/update-data.sql" ]; then
+                                echo "WARN: db/update-data.sql not found, skipping data update"
+                                exit 0
+                            fi
+                            
+                            echo "Running database update script..."
+                            
+                            # Read POSTGRES_DB and POSTGRES_PASSWORD from .env file
+                            POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2)
+                            POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2)
+                            
+                            # Run the update script
+                            docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
+                                    -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
+                                    db psql -U postgres -d "\${POSTGRES_DB}" -f /docker-entrypoint-initdb.d/db/update-data.sql
+                        
+                                echo "Database update completed successfully"
                         """
                     }
                 }
