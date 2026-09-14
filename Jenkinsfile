@@ -58,8 +58,9 @@ pipeline {
 
                             docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
                                     -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                    -w /app/db \
-                                    db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}" -f init-db.sql
+                                    cat db/init-db.sql | docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
+                                            -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
+                                            db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}"
                             echo "Database initialization completed"
                         """
                     }
