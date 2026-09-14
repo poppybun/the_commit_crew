@@ -66,26 +66,22 @@ pipeline {
         }
         stage('Update Database') {
             when {
-                // Only run if database-related files changed
                 changeset pattern: "db/**"
             }
             steps {
                 script {
-                    // Determine environment based on branch
                     def environment = 'dev'
                     if (env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
                         environment = 'prod'
                     }
                     echo "Updating database data for ${environment} environment..."
                     
-                    // Jenkins Credentials 
                     def credentialsId = (environment == 'prod') ? 'env-prod-file' : 'env-dev-file'
                     
                     withCredentials([file(credentialsId: credentialsId, variable: 'ENV_FILE_PATH')]) {
                         sh """
                             set -e
                             
-                            # Check if update-data.sql exists
                             if [ ! -f "db/update-data.sql" ]; then
                                 echo "WARN: db/update-data.sql not found, skipping data update"
                                 exit 0
@@ -93,15 +89,15 @@ pipeline {
                             
                             echo "Running database update script..."
                             
-                            # Read POSTGRES_DB and POSTGRES_PASSWORD from .env file
                             POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
                             POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
 
-                            # Run the update script by piping file content to psql
+                            # Set ON_ERROR_STOP to exit on first error
                             cat db/update-data.sql | docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
                                     -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                    db psql -U postgres -d "\${POSTGRES_DB}"
-                                echo "Database update completed successfully"
+                                    db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}"
+                            
+                            echo "Database update completed successfully"
                         """
                     }
                 }
