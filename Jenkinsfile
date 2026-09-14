@@ -58,9 +58,7 @@ pipeline {
 
                             docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
                                 -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                -w /docker-entrypoint-initdb.d \
-                                db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}" \
-                                -f init-db.sql
+                                db sh -c "cd /docker-entrypoint-initdb.d && psql -v ON_ERROR_STOP=1 -U postgres -d \"\${POSTGRES_DB}\" -f init-db.sql"
                             echo "Database initialization completed"
                         """
                     }
@@ -103,9 +101,7 @@ pipeline {
                             # Set ON_ERROR_STOP to exit on first error
                             docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
                                 -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
-                                -w /docker-entrypoint-initdb.d \
-                                db psql -v ON_ERROR_STOP=1 -U postgres -d "\${POSTGRES_DB}" \
-                                -f update-data.sql
+                                db sh -c "cd /docker-entrypoint-initdb.d && psql -v ON_ERROR_STOP=1 -U postgres -d \"\${POSTGRES_DB}\" -f update-data.sql"
                             
                             echo "Database update completed successfully"
                         """
