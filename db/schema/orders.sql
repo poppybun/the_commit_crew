@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS orders CASCADE;
 
 CREATE TABLE IF NOT EXISTS orders (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),

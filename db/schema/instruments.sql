@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS instruments;
+DROP TABLE IF EXISTS instruments CASCADE;
 CREATE TABLE IF NOT EXISTS instruments (
     symbol         VARCHAR(20) PRIMARY KEY CHECK (symbol = upper(symbol)),
     name           TEXT NOT NULL,
