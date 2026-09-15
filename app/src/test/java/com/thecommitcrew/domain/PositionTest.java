@@ -28,7 +28,7 @@ public class PositionTest {
         currentPrice = new BigDecimal("150");
         negativeCurrentPrice = new BigDecimal("-10");
         loweredCurrentPrice = new BigDecimal("50");
-        position = new Position("A001", "TSLA", quantity, averageCost);
+        position = new Position(1L, "TSLA", quantity, averageCost);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class PositionTest {
 
     @Test
     void marketValueWithZeroQuantity() throws NegativePriceException {
-        Position position1 = new Position("A001", "TSLA", zeroQuantity, averageCost);
+        Position position1 = new Position(1L, "TSLA", zeroQuantity, averageCost);
         
         assertEquals(new BigDecimal("0"), position1.marketValue(currentPrice));
     }
@@ -47,7 +47,7 @@ public class PositionTest {
     // Short position case
     @Test
     void marketValueWithNegativeQuantity() throws NegativePriceException {
-        Position position1 = new Position("A001", "TSLA", negativeQuantity, averageCost);
+        Position position1 = new Position(1L, "TSLA", negativeQuantity, averageCost);
         
         assertEquals(new BigDecimal("-750"), position1.marketValue(currentPrice));
     }

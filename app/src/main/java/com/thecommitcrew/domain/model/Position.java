@@ -7,20 +7,19 @@ import java.math.BigDecimal;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 
 public class Position {
-    //TODO: change to get accountId from Account class & update tests
-    private final String accountId;
+    private final Long accountId;
     private final String symbol;
     private final BigDecimal quantity;
     private final BigDecimal averageCost;
 
-    public Position(String accountId, String symbol, BigDecimal quantity, BigDecimal averageCost) {
+    public Position(Long accountId, String symbol, BigDecimal quantity, BigDecimal averageCost) {
         this.accountId = accountId;
         this.symbol = symbol;
         this.quantity = quantity;
         this.averageCost = averageCost;
     }
 
-    public String getAccountId() {
+    public Long getAccountId() {
         return accountId;
     }
 
