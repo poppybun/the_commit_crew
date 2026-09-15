@@ -33,7 +33,10 @@ pipeline {
                         sh """
                             set -e
                             
+                            echo "Checking init-db.sql content..."
+                            cat db/init-db.sql
                             docker-compose --env-file "\${ENV_FILE_PATH}" down db || true
+                            docker-compose --env-file "\${ENV_FILE_PATH}" build --no-cache db
                             docker-compose --env-file "\${ENV_FILE_PATH}" up -d db
                             echo "Docker compose up command completed..."
                             
