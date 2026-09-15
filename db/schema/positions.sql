@@ -1,4 +1,4 @@
--- DROP TABLE IF EXISTS positions;
+DROP TABLE IF EXISTS positions;
 
 CREATE TABLE IF NOT EXISTS positions (
     account_id      VARCHAR(32) NOT NULL,
