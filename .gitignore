@@ -3,5 +3,5 @@ target/
 .env.*
 .venv
 __init__.py
-*/__pycache__
+__pycache__
 analytics.log
