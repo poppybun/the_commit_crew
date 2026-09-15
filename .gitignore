@@ -1,7 +1,8 @@
 target/
 .env
 .env.*
-.venv
+*/.venv
 __init__.py
 __pycache__
 analytics.log
+.vscode
