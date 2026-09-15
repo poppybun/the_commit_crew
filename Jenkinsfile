@@ -39,7 +39,6 @@ pipeline {
                             
                             sleep 2
                             docker-compose --env-file "\${ENV_FILE_PATH}" ps db
-                            docker-compose --env-file "\${ENV_FILE_PATH}" logs db || true
                             
                             echo "Waiting for PostgreSQL to be ready..."
                             for i in {1..30}; do
@@ -50,6 +49,15 @@ pipeline {
                                 echo "Attempt \$i/30: Waiting for database..."
                                 sleep 2
                             done
+                            
+                            echo "Initializing database schema..."
+                            POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
+                            POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
+                            
+                            docker-compose --env-file "\${ENV_FILE_PATH}" exec -T \
+                                -e PGPASSWORD="\${POSTGRES_PASSWORD}" \
+                                db sh -c "cd /docker-entrypoint-initdb.d && psql -v ON_ERROR_STOP=1 -U postgres -d \"\${POSTGRES_DB}\" -f init-db.sql"
+                            
                             echo "Database initialization completed"
                         """
                     }
