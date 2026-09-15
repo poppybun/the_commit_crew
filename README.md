@@ -86,3 +86,10 @@ You should see the list of tables for each database.
 ## Jira backlog:
 
 [The Commit Crew](https://thecommitcrew.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog)
+
+## TEMP
+
+docker-compose -p commitcrew-prod --env-file .env.prod up -d --build
+docker-compose --env-file .env.prod up -d db
+docker-compose --env-file .env.prod exec -T db pg_isready -U postgres
+docker-compose --env-file .env.prod logs db -f

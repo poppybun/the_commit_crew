@@ -2,21 +2,34 @@ services:
   app:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8081:8080"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
   db:
-    build: ./db/
+    build: 
+      context: ./db
+      args:
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     environment:
-    # Use the values from the .env file in the same folder, and fail if they are not set.
+    # Use the values from the .env file passed via --env-file flag in Jenkinsfile
       POSTGRES_DB: ${POSTGRES_DB:?}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d/db
 
 volumes:
   db_data:
