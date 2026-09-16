@@ -8,7 +8,7 @@ import com.thecommitcrew.domain.enums.OrderStatus;
 
 public class Order {
     private final UUID id;
-    private final String accountId;
+    private final long accountId;
     private final String symbol;
     private final OrderSide side;
     private final int quantity;
@@ -17,7 +17,7 @@ public class Order {
     private final LocalDateTime createdOn;
     private final String idempotencyKey;
 
-    public Order(UUID id, String accountId, String symbol, OrderSide side, int quantity, BigDecimal price, OrderStatus status, LocalDateTime createdOn, String idempotencyKey) {
+    public Order(UUID id, long accountId, String symbol, OrderSide side, int quantity, BigDecimal price, OrderStatus status, LocalDateTime createdOn, String idempotencyKey) {
         this.id = id;
         this.accountId = accountId;
         this.symbol = symbol;
@@ -33,7 +33,7 @@ public class Order {
         return id;
     }
 
-    public String getAccountId() {
+    public long getAccountId() {
         return accountId;
     }
 
