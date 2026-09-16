@@ -2,6 +2,7 @@ target/
 .env
 .env.*
 */.venv
+*/.pytest_cache
 __init__.py
 __pycache__
 analytics.log
