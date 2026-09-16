@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+import com.thecommitcrew.domain.enums.AccountStatus;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 
 public class PositionTest {
@@ -17,6 +19,7 @@ public class PositionTest {
     private BigDecimal currentPrice;
     private BigDecimal negativeCurrentPrice;
     private BigDecimal loweredCurrentPrice;
+    private Account account;
 
     @BeforeEach
     void setUp() { 
@@ -27,7 +30,8 @@ public class PositionTest {
         currentPrice = new BigDecimal("150");
         negativeCurrentPrice = new BigDecimal("-10");
         loweredCurrentPrice = new BigDecimal("50");
-        position = new Position(1L, "TSLA", quantity, averageCost);
+        account = new Account(1L, "Test Account", new BigDecimal("10000"), AccountStatus.ACTIVE, 1L, LocalDateTime.now());
+        position = new Position(account, "TSLA", quantity, averageCost);
     }
 
     @Test
@@ -38,7 +42,7 @@ public class PositionTest {
 
     @Test
     void marketValueWithZeroQuantity() throws NegativePriceException {
-        Position position1 = new Position(1L, "TSLA", zeroQuantity, averageCost);
+        Position position1 = new Position(account, "TSLA", zeroQuantity, averageCost);
         
         assertEquals(new BigDecimal("0"), position1.marketValue(currentPrice));
     }
@@ -46,7 +50,7 @@ public class PositionTest {
     // Short position case
     @Test
     void marketValueWithNegativeQuantity() throws NegativePriceException {
-        Position position1 = new Position(1L, "TSLA", negativeQuantity, averageCost);
+        Position position1 = new Position(account, "TSLA", negativeQuantity, averageCost);
         
         assertEquals(new BigDecimal("-750"), position1.marketValue(currentPrice));
     }

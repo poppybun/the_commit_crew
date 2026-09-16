@@ -12,8 +12,8 @@ public class Position {
     private final BigDecimal quantity;
     private final BigDecimal averageCost;
 
-    public Position(Long accountId, String symbol, BigDecimal quantity, BigDecimal averageCost) {
-        this.accountId = accountId;
+    public Position(Account account, String symbol, BigDecimal quantity, BigDecimal averageCost) {
+        this.accountId = account.getAccountId();
         this.symbol = symbol;
         this.quantity = quantity;
         this.averageCost = averageCost;
