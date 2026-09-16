@@ -1,11 +1,10 @@
-package com.thecommitcrew.domain;
+package com.thecommitcrew.domain.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
-import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 
 public class PositionTest {
