@@ -1,6 +1,5 @@
-package com.thecommitcrew.domain;
+package com.thecommitcrew.domain.model;
 
-import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.enums.AccountStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
