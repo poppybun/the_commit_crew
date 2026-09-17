@@ -1,6 +1,8 @@
 package com.thecommitcrew.domain.model;
 
 import com.thecommitcrew.domain.enums.AccountStatus;
+import com.thecommitcrew.domain.validator.AccountStatusValidator;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,86 +14,135 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AccountTest {
     
     private Account account;
+    private static final AccountStatusValidator VALIDATOR = new DefaultAccountStatusValidator();
     
+    private static final Long TEST_ACCOUNT_ID = 1L;
+    private static final String TEST_HOLDER_NAME = "John Doe";
+    private static final String TEST_CURRENCY = "USD";
+    private static final String TEST_CURRENCY_EUR = "EUR";  
+    private static final Long TEST_VERSION = 1L;
+
+    private static final BigDecimal INITIAL_BALANCE = new BigDecimal("10000.00");
+    private static final BigDecimal SMALL_AMOUNT = new BigDecimal("100.00");
+    private static final BigDecimal DEBIT_AMOUNT = new BigDecimal("1000.00");
+    private static final BigDecimal CREDIT_AMOUNT = new BigDecimal("5000.00");
+    private static final BigDecimal INSUFFICIENT_AMOUNT = new BigDecimal("20000.00");
+    private static final BigDecimal MEDIUM_AMOUNT = new BigDecimal("500.00");
+
+    private Money createMoney(BigDecimal amount) {
+        return new Money(amount, TEST_CURRENCY);
+    }
+
+    private Money createEuroMoney(BigDecimal amount) {
+        return new Money(amount, TEST_CURRENCY_EUR);
+    }
+
     @BeforeEach
     public void setUp() {
         account = new Account(
-            1L,
-            "John Doe",
-            new BigDecimal("10000.00"),
+            TEST_ACCOUNT_ID,
+            TEST_HOLDER_NAME,
+            createMoney(INITIAL_BALANCE),
             AccountStatus.ACTIVE,
-            1L,
-            LocalDateTime.now()
+            TEST_VERSION,
+            LocalDateTime.now(),
+            VALIDATOR
         );
     }
-    
-    // Test 1: Successful debit
+
     @Test
-    public void testDebit_Success() {
-        BigDecimal initialBalance = account.getCashBalance();
-        BigDecimal debitAmount = new BigDecimal("1000.00");
+    public void testDebit_SuccessfulTransactionUpdatesBalance() {
+        Money debitAmount = createMoney(DEBIT_AMOUNT);
         
-        account.debit(debitAmount);
+        Account updatedAccount = account.debit(debitAmount);
         
-        assertEquals(initialBalance.subtract(debitAmount), account.getCashBalance());
+        assertEquals(createMoney(new BigDecimal("9000.00")), updatedAccount.getCashBalance());
     }
     
-    // Test 2: Debit with insufficient funds
     @Test
-    public void testDebit_InsufficientFunds() {
-        BigDecimal debitAmount = new BigDecimal("20000.00");
+    public void testDebit_ThrowsExceptionWhenInsufficientFunds() {
+        Money debitAmount = createMoney(INSUFFICIENT_AMOUNT);
         
         assertThrows(IllegalArgumentException.class, () -> {
             account.debit(debitAmount);
         });
     }
-    
-    // Test 3: Successful credit
+
     @Test
-    public void testCredit_Success() {
-        BigDecimal initialBalance = account.getCashBalance();
-        BigDecimal creditAmount = new BigDecimal("5000.00");
+    public void testCredit_SuccessfullyIncreasesBalance() {
+        Money creditAmount = createMoney(CREDIT_AMOUNT);
         
-        account.credit(creditAmount);
+        Account updatedAccount = account.credit(creditAmount);
         
-        assertEquals(initialBalance.add(creditAmount), account.getCashBalance());
+        assertEquals(createMoney(INITIAL_BALANCE.add(CREDIT_AMOUNT)), updatedAccount.getCashBalance());
+        // Original account should remain unchanged (immutable)
+        assertEquals(account.getCashBalance(), createMoney(INITIAL_BALANCE));
     }
     
-    // Additional test: Debit from inactive account
     @Test
-    public void testDebit_InactiveAccount() {
-        account.setStatus(AccountStatus.SUSPENDED);
+    public void testDebit_ThrowsExceptionWhenAccountIsInactive() {
+        Account suspendedAccount = account.updateStatus(AccountStatus.SUSPENDED);
         
         assertThrows(IllegalStateException.class, () -> {
-            account.debit(new BigDecimal("100.00"));
+            suspendedAccount.debit(createMoney(SMALL_AMOUNT));
         });
     }
-    
-    // Additional test: Debit with negative amount
+
     @Test
-    public void testDebit_NegativeAmount() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            account.debit(new BigDecimal("-1000.00"));
-        });
-    }
-    
-    // Additional test: Credit with negative amount
-    @Test
-    public void testCredit_NegativeAmount() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            account.credit(new BigDecimal("-1000.00"));
-        });
-    }
-    
-    // Additional test: isActive check
-    @Test
-    public void testIsActive() {
+    public void testIsActive_ReturnsTrueForActiveAndFalseForInactiveStatuses() {
         assertTrue(account.isActive());
         
-        account.setStatus(AccountStatus.SUSPENDED);
-        assertFalse(account.isActive());
+        Account suspendedAccount = account.updateStatus(AccountStatus.SUSPENDED);
+        assertFalse(suspendedAccount.isActive());
         
-        account.setStatus(AccountStatus.CLOSED);
-        assertFalse(account.isActive());
+        Account closedAccount = account.updateStatus(AccountStatus.CLOSED);
+        assertFalse(closedAccount.isActive());
+    }
+ 
+    @Test
+    public void testVersionIncrement_IncrementsOnEveryOperation() {
+        assertEquals(1L, account.getVersion());
+        
+        Account updatedAccount = account.debit(createMoney(new BigDecimal("100.00")));
+        assertEquals(2L, updatedAccount.getVersion());
+        
+        Account creditAccount = updatedAccount.credit(createMoney(new BigDecimal("50.00")));
+        assertEquals(3L, creditAccount.getVersion());
+    }
+    
+    @Test
+    public void testDebit_ThrowsExceptionWhenCurrencyMismatch() {
+        Money eurAmount = createEuroMoney(DEBIT_AMOUNT);
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            account.debit(eurAmount);
+        });
+    }
+
+    @Test
+    public void testEquals_IdentifiesAccountsByIdOnly() {
+        assertEquals(account, new Account(TEST_ACCOUNT_ID, "Different Name", 
+            createMoney(MEDIUM_AMOUNT), AccountStatus.ACTIVE, TEST_VERSION, 
+            LocalDateTime.now(), VALIDATOR));
+        
+        assertNotEquals(account, new Account(2L, "Different Name", 
+            createMoney(MEDIUM_AMOUNT), AccountStatus.ACTIVE, TEST_VERSION, 
+            LocalDateTime.now(), VALIDATOR));
+    }
+
+    static class DefaultAccountStatusValidator implements AccountStatusValidator {
+        @Override
+        public void validateCanDebit(AccountStatus status) {
+            if (status != AccountStatus.ACTIVE) {
+                throw new IllegalStateException("Cannot debit from inactive account");
+            }
+        }
+
+        @Override
+        public void validateCanCredit(AccountStatus status) {
+            if (status != AccountStatus.ACTIVE) {
+                throw new IllegalStateException("Cannot credit to inactive account");
+            }
+        }
     }
 }
