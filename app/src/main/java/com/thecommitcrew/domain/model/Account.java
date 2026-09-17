@@ -1,96 +1,95 @@
 package com.thecommitcrew.domain.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import com.thecommitcrew.domain.enums.AccountStatus;
+import com.thecommitcrew.domain.validator.AccountStatusValidator;
 
+/**
+ * Immutable aggregate root representing a trading account.
+ * Maintains account state and enforces business rules.
+ */
 public class Account {
-    private Long accountId;
-    private String holderName;
-    private BigDecimal cashBalance;
-    private AccountStatus status;
-    private Long version;
-    private LocalDateTime lastUpdated;
+    private final Long accountId;
+    private final String holderName;
+    private final Money cashBalance;
+    private final AccountStatus status;
+    private final Long version;
+    private final LocalDateTime lastUpdated;
+    
+    private final AccountStatusValidator statusValidator;
 
     // Constructor
-    public Account(Long accountId, String holderName, BigDecimal cashBalance, 
-                   AccountStatus status, Long version, LocalDateTime lastUpdated) {
-        this.accountId = accountId;
-        this.holderName = holderName;
-        this.cashBalance = cashBalance;
-        this.status = status;
-        this.version = version;
-        this.lastUpdated = lastUpdated;
+    public Account(Long accountId, String holderName, Money cashBalance, 
+                   AccountStatus status, Long version, LocalDateTime lastUpdated,
+                   AccountStatusValidator statusValidator) {
+        this.accountId = validateNotNull(accountId, "Account ID cannot be null");
+        this.holderName = validateNotBlank(holderName, "Holder name cannot be blank");
+        this.cashBalance = validateNotNull(cashBalance, "Cash balance cannot be null");
+        this.status = validateNotNull(status, "Status cannot be null");
+        this.version = validateNotNull(version, "Version cannot be null");
+        this.lastUpdated = validateNotNull(lastUpdated, "Last updated cannot be null");
+        this.statusValidator = validateNotNull(statusValidator, "Status validator cannot be null");
     }
 
     // Methods
 
-    /**
-     * Debits the specified amount from the account if it is active and has sufficient funds.
-     * Throws an exception if the account is not active, the amount is non-positive, or there are insufficient funds.
-     * Updates the cash balance and the last updated timestamp if the debit is successful.
-     */
-    public void debit(BigDecimal amount) {
-        if (!isActive()) {
-            throw new IllegalStateException("Cannot debit from inactive account");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Debit amount must be positive");
-        }
-        if (amount.compareTo(this.cashBalance) > 0) {
-            throw new IllegalArgumentException("Insufficient funds");
-        }
-        this.cashBalance = this.cashBalance.subtract(amount);
-        this.lastUpdated = LocalDateTime.now();
+    // Returns a new Account with updated balance (immutable pattern)
+    public Account debit(Money amount) {
+        statusValidator.validateCanDebit(this.status);
+        Money newBalance = this.cashBalance.subtract(amount);
+        return new Account(accountId, holderName, newBalance, status, version + 1, 
+                          LocalDateTime.now(), statusValidator);  
     }
 
-    /**
-     * Credits the specified amount to the account.
-     * Throws an exception if the amount is non-positive.
-     * Updates the cash balance and the last updated timestamp if the credit is successful.
-     */
-    public void credit(BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Credit amount must be positive");
-        }
-        this.cashBalance = this.cashBalance.add(amount);
-        this.lastUpdated = LocalDateTime.now();
+    public Account credit(Money amount) {
+        statusValidator.validateCanCredit(this.status);
+        Money newBalance = this.cashBalance.add(amount);
+        return new Account(accountId, holderName, newBalance, status, version + 1, 
+                          LocalDateTime.now(), statusValidator);
     }
 
-    public boolean isActive() {
-        return this.status == AccountStatus.ACTIVE;
+    public Account updateStatus(AccountStatus newStatus) {
+        return new Account(accountId, holderName, cashBalance, newStatus, version + 1, 
+                          LocalDateTime.now(), statusValidator);
     }
 
-    // Getters and Setters
-    public Long getAccountId() {
-        return accountId;
+    // Getters only (no setters)
+    public Long getAccountId() { return accountId; }
+    public String getHolderName() { return holderName; }
+    public Money getCashBalance() { return cashBalance; }
+    public AccountStatus getStatus() { return status; }
+    public Long getVersion() { return version; }
+    public boolean isActive() { return status == AccountStatus.ACTIVE; }
+    public LocalDateTime getLastUpdated() { return lastUpdated; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(accountId, account.accountId);
     }
 
-    public String getHolderName() {
-        return holderName;
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId);
     }
 
-    public BigDecimal getCashBalance() {
-        return cashBalance;
+    @Override
+    public String toString() {
+        return String.format("Account{id=%d, holder=%s, balance=%s, status=%s}", 
+            accountId, holderName, cashBalance, status);
     }
 
-    public AccountStatus getStatus() {
-        return status;
+    private static <T> T validateNotNull(T value, String message) {
+        if (value == null) throw new IllegalArgumentException(message);
+        return value;
     }
 
-    // Setter for account status
-    // Updates the account status and refreshes the last updated timestamp
-    public void setStatus(AccountStatus status) {
-        this.status = status;
-        this.lastUpdated = LocalDateTime.now();
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
+    private static String validateNotBlank(String value, String message) {
+        if (value == null || value.isBlank()) throw new IllegalArgumentException(message);
+        return value;
     }
 }
