@@ -1,0 +1,82 @@
+classDiagram
+    %% Enums
+    class AccountStatus {
+        ACTIVE
+        SUSPENDED
+        CLOSED
+    }
+    
+    class OrderStatus {
+        NEW
+        FILLED
+        REJECTED
+        CANCELLED
+    }
+    
+    class OrderSide {
+        BUY
+        SELL
+        apply(current: long, orderQty: long): long
+    }
+    
+    %% Value Objects
+    class Money {
+        -amount: BigDecimal
+        -currency: String
+        +add(Money): Money
+        +subtract(Money): Money
+        +isPositive(): boolean
+    }
+    
+    %% Models
+    class Account {
+        -accountId: Long
+        -holderName: String
+        -cashBalance: Money
+        -status: AccountStatus
+        -version: Long
+        +debit(Money): Account
+        +credit(Money): Account
+        +updateStatus(AccountStatus): Account
+        +isActive(): boolean
+    }
+    
+    class Instrument {
+        -id: String
+        -symbol: String
+        -name: String
+        -currency: String
+        -tradable: boolean
+    }
+    
+    class Order {
+        -id: UUID
+        -accountId: Long
+        -symbol: String
+        -side: OrderSide
+        -quantity: long
+        -price: BigDecimal
+        -status: OrderStatus
+    }
+    
+    class Position {
+        -id: Long
+        -accountId: Long
+        -instrumentId: String
+        -quantity: long
+    }
+    
+    %% Interfaces
+    class AccountStatusValidator {
+        <<interface>>
+        +validateCanDebit(AccountStatus): void
+        +validateCanCredit(AccountStatus): void
+    }
+    
+    %% Relationships
+    Account --> Money : has
+    Account --> AccountStatus : has
+    Account --> AccountStatusValidator : uses
+    Order --> OrderSide : has
+    Order --> OrderStatus : has
+    Position --> Instrument : references
