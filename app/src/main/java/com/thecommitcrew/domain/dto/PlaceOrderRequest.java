@@ -25,6 +25,9 @@ public class PlaceOrderRequest {
     @NotNull(message = "Price cannot be null")
     @Positive(message = "Price must be positive")
     private BigDecimal price;
+    
+    @NotBlank(message = "Idempotency key cannot be blank")
+    private String idempotencyKey;
 
 
     public String getSymbol() {
@@ -57,6 +60,14 @@ public class PlaceOrderRequest {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
 }

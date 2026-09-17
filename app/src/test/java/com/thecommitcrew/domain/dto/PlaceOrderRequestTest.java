@@ -17,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 
-
 /*
 * Using Validator instance since this class has annotations
 * Validator checks that the validation rules work correctly
@@ -40,6 +39,7 @@ public class PlaceOrderRequestTest {
         request.setSide(OrderSide.BUY);
         request.setQuantity(100);
         request.setPrice(new BigDecimal("150.00"));
+        request.setIdempotencyKey("KEY-12345");
         
         Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty());
@@ -68,6 +68,7 @@ public class PlaceOrderRequestTest {
             request.setSide(OrderSide.BUY);
             request.setQuantity(100);
             request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("KEY-12345");
             
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
@@ -75,11 +76,13 @@ public class PlaceOrderRequestTest {
     }
 
     @Test
+    @DisplayName("Test null symbol")
     void testSideCannotBeNull() {
         request.setSymbol("AAPL");
         request.setSide(null);
         request.setQuantity(100);
         request.setPrice(new BigDecimal("150.00"));
+        request.setIdempotencyKey("KEY-12345");
         
         Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty());
@@ -96,6 +99,7 @@ public class PlaceOrderRequestTest {
             request.setSide(OrderSide.BUY);
             request.setQuantity(0);
             request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("KEY-12345");
             
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
@@ -108,6 +112,7 @@ public class PlaceOrderRequestTest {
             request.setSide(OrderSide.BUY);
             request.setQuantity(-5);
             request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("KEY-12345");
             
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
@@ -125,6 +130,7 @@ public class PlaceOrderRequestTest {
             request.setSide(OrderSide.BUY);
             request.setQuantity(100);
             request.setPrice(null);
+            request.setIdempotencyKey("KEY-12345");
             
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
@@ -137,9 +143,23 @@ public class PlaceOrderRequestTest {
             request.setSide(OrderSide.BUY);
             request.setQuantity(100);
             request.setPrice(new BigDecimal("0.00"));
+            request.setIdempotencyKey("KEY-12345");
             
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
         }
+    }
+
+    @Test
+    @DisplayName("Test blank idempotency key")
+    void testIdempotencyKeyCannotBeBlank() {
+        request.setSymbol("AAPL");
+        request.setSide(OrderSide.BUY);
+        request.setQuantity(100);
+        request.setPrice(new BigDecimal("150.00"));
+        request.setIdempotencyKey("   ");
+        
+        Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
+        assertFalse(violations.isEmpty());
     }
 }

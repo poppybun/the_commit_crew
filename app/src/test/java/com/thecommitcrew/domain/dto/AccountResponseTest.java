@@ -27,12 +27,14 @@ public class AccountResponseTest {
         String holderName = "Pippo";
         BigDecimal cashBalance = new BigDecimal("10000.00");
         AccountStatus status = AccountStatus.ACTIVE;
+        Long version = 1L;
         LocalDateTime lastUpdated = LocalDateTime.now();
         
         response.setAccountId(accountId);
         response.setHolderName(holderName);
         response.setCashBalance(cashBalance);
         response.setStatus(status);
+        response.setVersion(version);
         response.setLastUpdated(lastUpdated);
         
         assertNotNull(response);
@@ -58,6 +60,10 @@ public class AccountResponseTest {
         AccountStatus status = AccountStatus.ACTIVE;
         response.setStatus(status);
         assertEquals(status, response.getStatus());
+        
+        Long version = 1L;
+        response.setVersion(version);
+        assertEquals(version, response.getVersion());
         
         LocalDateTime lastUpdated = LocalDateTime.now();
         response.setLastUpdated(lastUpdated);

@@ -11,6 +11,7 @@ public class AccountResponse {
     private String holderName;
     private BigDecimal cashBalance;
     private AccountStatus status;
+    private Long version;
     private LocalDateTime lastUpdated;
 
 
@@ -37,6 +38,12 @@ public class AccountResponse {
     }
     public void setStatus(AccountStatus status) {
         this.status = status;
+    }
+    public Long getVersion() {
+        return version;
+    }
+    public void setVersion(Long version) {
+        this.version = version;
     }
     public LocalDateTime getLastUpdated() {
         return lastUpdated;

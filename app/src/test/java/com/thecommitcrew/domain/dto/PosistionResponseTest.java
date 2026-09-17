@@ -23,14 +23,10 @@ public class PosistionResponseTest {
         String symbol = "AAPL";
         int quantity = 100;
         BigDecimal averagePrice = new BigDecimal("150.00");
-        BigDecimal currentMarketPrice = new BigDecimal("155.50");
-        BigDecimal totalValue = new BigDecimal("15550.00");
         
         response.setSymbol(symbol);
         response.setQuantity(quantity);
-        response.setAveragePrice(averagePrice);
-        response.setCurrentMarketPrice(currentMarketPrice);
-        response.setTotalValue(totalValue);
+        response.setAverageCost(averagePrice);
         
         assertNotNull(response);
     }
@@ -47,16 +43,8 @@ public class PosistionResponseTest {
         assertEquals(quantity, response.getQuantity());
         
         BigDecimal averagePrice = new BigDecimal("300.00");
-        response.setAveragePrice(averagePrice);
-        assertEquals(averagePrice, response.getAveragePrice());
-        
-        BigDecimal currentMarketPrice = new BigDecimal("310.00");
-        response.setCurrentMarketPrice(currentMarketPrice);
-        assertEquals(currentMarketPrice, response.getCurrentMarketPrice());
-        
-        BigDecimal totalValue = new BigDecimal("15500.00");
-        response.setTotalValue(totalValue);
-        assertEquals(totalValue, response.getTotalValue());
+        response.setAverageCost(averagePrice);
+        assertEquals(averagePrice, response.getAverageCost());
     }
 
 }
