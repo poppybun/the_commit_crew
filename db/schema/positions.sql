@@ -1,6 +1,6 @@
--- DROP TABLE IF EXISTS positions;
+DROP TABLE IF EXISTS positions CASCADE;
 
-CREATE TABLE positions (
+CREATE TABLE IF NOT EXISTS positions (
     account_id      VARCHAR(32) NOT NULL,
     symbol          VARCHAR(20) NOT NULL,
     quantity        NUMERIC(14,4) NOT NULL CHECK (quantity > 0),

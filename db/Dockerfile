@@ -1,16 +1,16 @@
 FROM postgres:15
 
-ENV POSTGRES_PASSWORD=my_secure_password
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-RUN echo "host all all 10.9.0.0/16 scram-sha-256" >> /usr/share/postgresql/5432/pg_hba.conf.sample \
-    && echo "host all all 10.9.0.0/16 scram-sha-256" >> /var/lib/postgresql/data/pg_hba.conf || true
+# Single init script that runs everything in proper order
+RUN echo '#!/bin/bash\nset -e\n\n# Wait for PGDATA to be ready\nwhile [ ! -d "$PGDATA" ]; do sleep 0.1; done\n\n# Add IP restriction\necho "host all all 10.9.0.0/16 scram-sha-256" >> "$PGDATA/pg_hba.conf"\n' > /docker-entrypoint-initdb.d/00-init.sh \
+    && chmod +x /docker-entrypoint-initdb.d/00-init.sh
 
-RUN echo '#!/bin/bash\necho "host all all 10.9.0.0/16 scram-sha-256" >> "$PGDATA/pg_hba.conf"' > /docker-entrypoint-initdb.d/01-restrict-ip.sh \
-    && chmod +x /docker-entrypoint-initdb.d/01-restrict-ip.sh
+# Copy entire db directory with schema, seeds, and indexes
+COPY . /docker-entrypoint-initdb.d/
 
-ARG SCHEMA_PATH=init-db.sql
-
-COPY ${SCHEMA_PATH} /docker-entrypoint-initdb.d/init-db.sql
+# Make all shell scripts executable
+RUN chmod +x /docker-entrypoint-initdb.d/*.sh
 
 VOLUME /var/lib/postgresql/data
 
