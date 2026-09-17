@@ -44,10 +44,13 @@ pipeline {
                                 echo "Database container not running, initializing from scratch..."
                                 docker-compose --env-file "\${ENV_FILE_PATH}" down db --remove-orphans || true
                                 
-                                # Force remove ALL containers that might be holding the port
-                                docker ps -a --format "{{.Names}}" | xargs -r docker rm -f 2>/dev/null || true
-                                
-                                # Extra: wait for OS to release the port
+                                # Remove all postgres/db containers across all projects
+                                docker ps -a --filter "ancestor=postgres" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+
+                                # Remove containers with "db" in the name
+                                docker ps -a --filter "name=db" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+
+                                # Wait for OS to release the port
                                 sleep 3
                                 
                                 docker-compose --env-file "\${ENV_FILE_PATH}" build --no-cache db
