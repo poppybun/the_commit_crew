@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain;
+package com.thecommitcrew.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,8 +7,10 @@ import com.thecommitcrew.domain.enums.AccountStatus;
 import com.thecommitcrew.domain.enums.OrderSide;
 import com.thecommitcrew.domain.enums.OrderStatus;
 import com.thecommitcrew.domain.model.Account;
+import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.model.Order;
-import com.thecommitcrew.domain.service.OrderService;
+import com.thecommitcrew.domain.validator.DefaultAccountStatusValidator;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,10 +30,11 @@ class OrderLogicTest {
 		activeAccount = new Account(
 			123L,
 			"John Doe",
-			new BigDecimal("10000.00"),
+			new Money(new BigDecimal("10000.00"), "USD"),
 			AccountStatus.ACTIVE,
 			1L,
-			LAST_UPDATED
+			LAST_UPDATED,
+			new DefaultAccountStatusValidator()  // Use concrete implementation
 		);
 	}
 
@@ -75,7 +78,7 @@ class OrderLogicTest {
 
 	@Test
 	void testReject_InactiveAccount() {
-		activeAccount.setStatus(AccountStatus.SUSPENDED);
+		activeAccount = activeAccount.updateStatus(AccountStatus.SUSPENDED);
 
 		Order order = orderService.placeOrder(
 			activeAccount,
