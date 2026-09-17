@@ -7,18 +7,18 @@ import com.thecommitcrew.domain.enums.AccountStatus;
 
 public class AccountResponse {
 
-    private Long account;
+    private Long accountId;
     private String holderName;
     private BigDecimal cashBalance;
     private AccountStatus status;
     private LocalDateTime lastUpdated;
 
 
-    public Long getAccount() {
-        return account;
+    public Long getAccountId() {
+        return accountId;
     }
-    public void setAccount(Long account) {
-        this.account = account;
+    public void setAccountId(Long account) {
+        this.accountId = account;
     }
     public String getHolderName() {
         return holderName;
