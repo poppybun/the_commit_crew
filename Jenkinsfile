@@ -51,7 +51,7 @@ pipeline {
                                         echo "Port cleaned successfully"
                                         break
                                     fi
-                                    echo "Attempt $attempt: Port still in use, retrying..."
+                                    echo "Attempt \$attempt: Port still in use, retrying..."
                                     sleep 2
                                 done
                                 sleep 2
