@@ -11,13 +11,13 @@ public class Order {
     private final Long accountId;
     private final String symbol;
     private final OrderSide side;
-    private final BigDecimal quantity;
+    private final long quantity;
     private final BigDecimal price;
     private OrderStatus status;
     private final LocalDateTime createdOn;
     private final String idempotencyKey;
 
-    public Order(UUID id, Long accountId, String symbol, OrderSide side, BigDecimal quantity, BigDecimal price, OrderStatus status, LocalDateTime createdOn, String idempotencyKey) {
+    public Order(UUID id, Long accountId, String symbol, OrderSide side, long quantity, BigDecimal price, OrderStatus status, LocalDateTime createdOn, String idempotencyKey) {
         this.id = id;
         this.accountId = accountId;
         this.symbol = symbol;
@@ -45,7 +45,7 @@ public class Order {
         return side;
     }
 
-    public BigDecimal getQuantity() {
+    public long getQuantity() {
         return quantity;
     }
 

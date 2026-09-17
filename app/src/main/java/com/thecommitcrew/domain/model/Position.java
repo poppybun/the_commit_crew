@@ -8,10 +8,10 @@ import java.math.BigDecimal;
 public class Position {
     private final Long accountId;
     private final String symbol;
-    private final BigDecimal quantity;
+    private final long quantity;
     private final BigDecimal averageCost;
 
-    public Position(Long accountId, String symbol, BigDecimal quantity, BigDecimal averageCost) {
+    public Position(Long accountId, String symbol, long quantity, BigDecimal averageCost) {
         this.accountId = accountId;
         this.symbol = symbol;
         this.quantity = quantity;
@@ -26,7 +26,7 @@ public class Position {
         return symbol;
     }
 
-    public BigDecimal getQuantity() {
+    public long getQuantity() {
         return quantity;
     }
 

@@ -9,13 +9,14 @@ import com.thecommitcrew.domain.exception.NegativePriceException;
 
 public class PositionService {
     private static final BigDecimal ZERO = BigDecimal.ZERO;
+    private static final long ZERO_QUANTITY = 0L;
     
     public Position applyOrder(Position position, Order order) {
-        BigDecimal orderQuantity = order.getQuantity();
-        BigDecimal currentQuantity = position.getQuantity();
-        BigDecimal newQuantity = calculateNewQuantity(currentQuantity, orderQuantity, order.getSide());
+        long orderQuantity = order.getQuantity();
+        long currentQuantity = position.getQuantity();
+        long newQuantity = calculateNewQuantity(currentQuantity, orderQuantity, order.getSide());
         
-        if (newQuantity.compareTo(ZERO) < 0) {
+        if (newQuantity < ZERO_QUANTITY) {
             throw new IllegalArgumentException("Cannot sell more shares than owned");
         }
         
@@ -24,13 +25,13 @@ public class PositionService {
         return new Position(position.getAccountId(), order.getSymbol(), newQuantity, newAverageCost);
     }
     
-    private BigDecimal calculateNewQuantity(BigDecimal currentQuantity, BigDecimal orderQuantity, OrderSide side) {
+    private long calculateNewQuantity(long currentQuantity, long orderQuantity, OrderSide side) {
         return side.apply(currentQuantity, orderQuantity);
     }
     
-    private BigDecimal calculateUpdatedCostBasis(Position position, Order order, BigDecimal newQuantity) {
+    private BigDecimal calculateUpdatedCostBasis(Position position, Order order, long newQuantity) {
         
-        if (newQuantity.compareTo(ZERO) == 0) {
+        if (newQuantity == ZERO_QUANTITY) {
             return ZERO;
         }
         
@@ -39,9 +40,9 @@ public class PositionService {
         }
 
         BigDecimal costBasis = calculateCostBasis(position);
-        BigDecimal tradeTotal = order.getQuantity().multiply(order.getPrice());
+        BigDecimal tradeTotal = new BigDecimal(order.getQuantity()).multiply(order.getPrice());
         BigDecimal newTotal = costBasis.add(tradeTotal);
-        BigDecimal averageCost = newTotal.divide(newQuantity, RoundingMode.HALF_UP);
+        BigDecimal averageCost = newTotal.divide(new BigDecimal(newQuantity), RoundingMode.HALF_UP);
 
         return averageCost;
     }
@@ -50,7 +51,7 @@ public class PositionService {
         if (currentPrice.compareTo(ZERO) < 0) {
             throw new NegativePriceException("Current price of asset cannot be negative.");
         }
-        return position.getQuantity().multiply(currentPrice);
+        return new BigDecimal(position.getQuantity()).multiply(currentPrice);
     }
 
     public BigDecimal unrealizedProfitLoss(Position position, BigDecimal currentPrice) throws NegativePriceException {
@@ -60,6 +61,6 @@ public class PositionService {
     }
 
     public BigDecimal calculateCostBasis(Position position) {
-        return position.getQuantity().multiply(position.getAverageCost());
+        return new BigDecimal(position.getQuantity()).multiply(position.getAverageCost());
     }
 }

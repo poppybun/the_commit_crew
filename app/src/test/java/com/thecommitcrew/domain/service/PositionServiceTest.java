@@ -20,8 +20,8 @@ public class PositionServiceTest {
     private Position position;
     private Order buyOrder;
     private Order sellOrder;
-    private BigDecimal quantity;
-    private BigDecimal zeroQuantity;
+    private long quantity;
+    private long zeroQuantity;
     private BigDecimal averageCost;
     private BigDecimal currentPrice;
     private BigDecimal negativeCurrentPrice;
@@ -30,15 +30,15 @@ public class PositionServiceTest {
     @BeforeEach
     void setUp() {
         positionService = new PositionService();
-        quantity = new BigDecimal("10");
-        zeroQuantity = new BigDecimal("0");
+        quantity = 10L;
+        zeroQuantity = 0L;
         averageCost = new BigDecimal("100");
         currentPrice = new BigDecimal("150");
         negativeCurrentPrice = new BigDecimal("-10");
         loweredCurrentPrice = new BigDecimal("50");
         position = new Position(1L, "TSLA", quantity, averageCost);
-        buyOrder = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.BUY, new BigDecimal("5"), new BigDecimal("110"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
-        sellOrder = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, new BigDecimal("3"), new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-3");
+        buyOrder = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.BUY, 5L, new BigDecimal("110"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
+        sellOrder = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, 3L, new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-3");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class PositionServiceTest {
     void applyBuyOrderIncreasesQuantity() {
         Position updatedPosition = positionService.applyOrder(position, buyOrder);
         
-        assertEquals(new BigDecimal("15"), updatedPosition.getQuantity());
+        assertEquals(15L, updatedPosition.getQuantity());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class PositionServiceTest {
     void applySellOrderDecreasesQuantity() {
         Position updatedPosition = positionService.applyOrder(position, sellOrder);
         
-        assertEquals(new BigDecimal("7"), updatedPosition.getQuantity());
+        assertEquals(7L, updatedPosition.getQuantity());
     }
 
     @Test
@@ -106,16 +106,16 @@ public class PositionServiceTest {
 
     @Test
     void applySellOrderClosingPosition() {
-        Order sellOrderClosing = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, new BigDecimal("10"), new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
+        Order sellOrderClosing = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, 10L, new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
         Position updatedPosition = positionService.applyOrder(position, sellOrderClosing);
         
-        assertEquals(BigDecimal.ZERO, updatedPosition.getQuantity());
+        assertEquals(0L, updatedPosition.getQuantity());
         assertEquals(BigDecimal.ZERO, updatedPosition.getAverageCost());
     }
 
     @Test
     void applyOrderThrowsExceptionWhenSellingMoreThanOwned() {
-        Order sellOrderTooMany = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, new BigDecimal("15"), new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
+        Order sellOrderTooMany = new Order(UUID.randomUUID(), 1L, "TSLA", OrderSide.SELL, 15L, new BigDecimal("120"), OrderStatus.NEW, LocalDateTime.now(), "idempotency-1");
         
         assertThrows(IllegalArgumentException.class, () -> {
             positionService.applyOrder(position, sellOrderTooMany);

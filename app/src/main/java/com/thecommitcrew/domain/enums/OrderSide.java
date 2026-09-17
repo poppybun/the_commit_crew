@@ -1,16 +1,15 @@
 package com.thecommitcrew.domain.enums;
-import java.math.BigDecimal;
 
 public enum OrderSide {
     BUY,
     SELL;
 
-    public BigDecimal apply(BigDecimal current, BigDecimal orderQty) {
+    public long apply(long current, long orderQty) {
         switch (this) {
             case BUY:
-                return current.add(orderQty);
+                return current + orderQty;
             case SELL:
-                return current.subtract(orderQty);
+                return current - orderQty;
             default:
                 throw new IllegalArgumentException("Unknown order side: " + this);
         }
