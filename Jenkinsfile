@@ -38,10 +38,24 @@ pipeline {
                             
                             POSTGRES_DB=\$(grep "^POSTGRES_DB=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
                             POSTGRES_PASSWORD=\$(grep "^POSTGRES_PASSWORD=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs)
+                            POSTGRES_PORT=\$(grep "^POSTGRES_PORT=" "\${ENV_FILE_PATH}" | cut -d'=' -f2 | tr -d '\r' | xargs || echo "5432")
                             
                             if [ "\$RUNNING" = "false" ]; then
                                 echo "Database container not running, initializing from scratch..."
-                                docker-compose --env-file "\${ENV_FILE_PATH}" down db || true
+                                docker-compose --env-file "\${ENV_FILE_PATH}" down db --remove-orphans || true
+                                
+                                # Retry port cleanup with backoff
+                                for attempt in {1..3}; do
+                                    lsof -ti:\${POSTGRES_PORT} | xargs -r kill -9 2>/dev/null || true
+                                    if ! lsof -ti:\${POSTGRES_PORT} 2>/dev/null; then
+                                        echo "Port cleaned successfully"
+                                        break
+                                    fi
+                                    echo "Attempt \$attempt: Port still in use, retrying..."
+                                    sleep 2
+                                done
+                                sleep 2
+                                
                                 docker-compose --env-file "\${ENV_FILE_PATH}" build --no-cache db
                                 docker-compose --env-file "\${ENV_FILE_PATH}" up -d db
                                 
