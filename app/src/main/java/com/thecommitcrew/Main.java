@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain;
+package com.thecommitcrew;
 
 public class Main {
     public static void main(String[] args) {
