@@ -44,17 +44,11 @@ pipeline {
                                 echo "Database container not running, initializing from scratch..."
                                 docker-compose --env-file "\${ENV_FILE_PATH}" down db --remove-orphans || true
                                 
-                                # Retry port cleanup with backoff
-                                for attempt in {1..3}; do
-                                    lsof -ti:\${POSTGRES_PORT} | xargs -r kill -9 2>/dev/null || true
-                                    if ! lsof -ti:\${POSTGRES_PORT} 2>/dev/null; then
-                                        echo "Port cleaned successfully"
-                                        break
-                                    fi
-                                    echo "Attempt \$attempt: Port still in use, retrying..."
-                                    sleep 2
-                                done
-                                sleep 2
+                                # Force remove ALL containers that might be holding the port
+                                docker ps -a --format "{{.Names}}" | xargs -r docker rm -f 2>/dev/null || true
+                                
+                                # Extra: wait for OS to release the port
+                                sleep 3
                                 
                                 docker-compose --env-file "\${ENV_FILE_PATH}" build --no-cache db
                                 docker-compose --env-file "\${ENV_FILE_PATH}" up -d db
