@@ -20,7 +20,7 @@ public class PlaceOrderRequest {
     
     @NotNull(message = "Quantity cannot be null")
     @Positive(message = "Quantity must be positive")
-    private int quantity;
+    private long quantity;
     
     @NotNull(message = "Price cannot be null")
     @Positive(message = "Price must be positive")
@@ -46,11 +46,11 @@ public class PlaceOrderRequest {
         this.side = side;
     }
 
-    public int getQuantity() {
+    public long getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(long quantity) {
         this.quantity = quantity;
     }
 

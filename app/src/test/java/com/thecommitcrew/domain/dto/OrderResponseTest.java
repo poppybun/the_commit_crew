@@ -29,11 +29,10 @@ public class OrderResponseTest {
         String accountId = "ACC123";
         String symbol = "AAPL";
         OrderSide side = OrderSide.BUY;
-        int quantity = 100;
+        long quantity = 100;
         BigDecimal price = new BigDecimal("150.00");
         OrderStatus status = OrderStatus.FILLED;
         LocalDateTime createdOn = LocalDateTime.now();
-        String idempotencyKey = "IDEMPOTENCY_123";
 
         response.setId(id);
         response.setAccountId(accountId);
@@ -43,7 +42,6 @@ public class OrderResponseTest {
         response.setPrice(price);
         response.setStatus(status);
         response.setCreatedOn(createdOn);
-        response.setIdempotencyKey(idempotencyKey);
         
         assertNotNull(response);
     }
@@ -67,7 +65,7 @@ public class OrderResponseTest {
         response.setSide(side);
         assertEquals(side, response.getSide());
         
-        int quantity = 50;
+        long quantity = 50;
         response.setQuantity(quantity);
         assertEquals(quantity, response.getQuantity());
         
@@ -82,10 +80,6 @@ public class OrderResponseTest {
         LocalDateTime createdOn = LocalDateTime.now();
         response.setCreatedOn(createdOn);
         assertEquals(createdOn, response.getCreatedOn());
-        
-        String idempotencyKey = "KEY_123";
-        response.setIdempotencyKey(idempotencyKey);
-        assertEquals(idempotencyKey, response.getIdempotencyKey());
     }
 
 }
