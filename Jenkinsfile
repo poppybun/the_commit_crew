@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn -B clean package'
+                sh 'mvn -B clean package -f app/pom.xml'
             }
         }
         stage('Build Image') {
@@ -23,12 +23,12 @@ pipeline {
         }
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'app/target/*.jar', fingerprint: true
             }
         }
         stage('Test') {
-            steps { sh 'mvn -B test' }
-                post { always { junit 'target/surefire-reports/*.xml' } }
+            steps { sh 'mvn -B test -f app/pom.xml' }
+                post { always { junit 'app/target/surefire-reports/*.xml' } }
         }
 
     }
