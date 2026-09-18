@@ -33,6 +33,10 @@ pipeline {
                         sh """
                             set -e
                             
+                            echo "Cleaning up previous database state..."
+                            docker-compose --env-file "\${ENV_FILE_PATH}" down -v || true
+                            sleep 2
+
                             # Check if DB container already exists and is running
                             RUNNING=\$(docker-compose --env-file "\${ENV_FILE_PATH}" ps db 2>/dev/null | grep -q "Up" && echo "true" || echo "false")
                             
