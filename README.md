@@ -82,7 +82,7 @@ You should see the list of tables for each database.
 
 ## Jenkins Pipeline available at
 [10.9.75.153:8080](http://10.9.75.153:8080) (develop & feature/)<br />
-[10.9.70.90:8080] (http://10.9.70.90:8080/job/the-commit-crew-main/) (main)
+[10.9.70.90:8080](http://10.9.70.90:8080/job/the-commit-crew-main/) (main)
 
 ## Jira backlog:
 
