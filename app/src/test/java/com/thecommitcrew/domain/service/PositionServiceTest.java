@@ -69,7 +69,7 @@ public class PositionServiceTest {
     }
 
     @Nested
-    @DisplayName("Apply order operations")
+    @DisplayName("Unrealized profit/loss calculations")
     class UPLOperations {
         @Test
         @DisplayName("Calculates profit correctly with valid inputs")
