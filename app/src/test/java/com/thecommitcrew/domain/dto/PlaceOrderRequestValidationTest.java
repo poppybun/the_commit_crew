@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Nested;
 * Using Validator instance since this class has annotations
 * Validator checks that the validation rules work correctly
 */
-public class PlaceOrderRequestTest {
+public class PlaceOrderRequestValidationTest {
     
     private Validator validator;
     private PlaceOrderRequest request;
@@ -34,7 +34,8 @@ public class PlaceOrderRequestTest {
     }
     
     @Test
-    void testValidPlaceOrderRequest() {
+    @DisplayName("Test valid PlaceOrderRequest")
+    void testValidRequest() {
         request.setSymbol("AAPL");
         request.setSide(OrderSide.BUY);
         request.setQuantity(100);
@@ -46,51 +47,8 @@ public class PlaceOrderRequestTest {
     }
 
     @Nested
-    @DisplayName("Symbol tests")
-    class testingSymbol {
-
-        @Test
-        @DisplayName("Test null symbol")
-        void testSymbolCannotBeNull() {
-            request.setSymbol(null);
-            request.setSide(OrderSide.BUY);
-            request.setQuantity(100);
-            request.setPrice(new BigDecimal("150.00"));
-            
-            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
-            assertFalse(violations.isEmpty());
-        }
-
-        @Test
-        @DisplayName("Test empty symbol")
-        void testSymbolCannotBeBlank() {
-            request.setSymbol("   ");
-            request.setSide(OrderSide.BUY);
-            request.setQuantity(100);
-            request.setPrice(new BigDecimal("150.00"));
-            request.setIdempotencyKey("KEY-12345");
-            
-            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
-            assertFalse(violations.isEmpty());
-        }
-    }
-
-    @Test
-    @DisplayName("Test null symbol")
-    void testSideCannotBeNull() {
-        request.setSymbol("AAPL");
-        request.setSide(null);
-        request.setQuantity(100);
-        request.setPrice(new BigDecimal("150.00"));
-        request.setIdempotencyKey("KEY-12345");
-        
-        Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty());
-    }
-
-    @Nested
-    @DisplayName("Quantity tests")
-    class testingQuantity {
+    @DisplayName("Invalid quantity tests")
+    class testInvalidQuantity {
 
         @Test
         @DisplayName("Test null quantity")
@@ -120,8 +78,8 @@ public class PlaceOrderRequestTest {
     }
 
     @Nested
-    @DisplayName("Price tests")
-    class testingPrice {
+    @DisplayName("Test null fields")
+    class testNullFields {
 
         @Test
         @DisplayName("Test null price")
@@ -148,18 +106,57 @@ public class PlaceOrderRequestTest {
             Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
             assertFalse(violations.isEmpty());
         }
-    }
 
-    @Test
-    @DisplayName("Test blank idempotency key")
-    void testIdempotencyKeyCannotBeBlank() {
-        request.setSymbol("AAPL");
-        request.setSide(OrderSide.BUY);
-        request.setQuantity(100);
-        request.setPrice(new BigDecimal("150.00"));
-        request.setIdempotencyKey("   ");
-        
-        Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty());
+        @Test
+        @DisplayName("Test blank idempotency key")
+        void testIdempotencyKeyCannotBeBlank() {
+            request.setSymbol("AAPL");
+            request.setSide(OrderSide.BUY);
+            request.setQuantity(100);
+            request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("   ");
+            
+            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
+            assertFalse(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Test null symbol")
+        void testSymbolCannotBeNull() {
+            request.setSymbol(null);
+            request.setSide(OrderSide.BUY);
+            request.setQuantity(100);
+            request.setPrice(new BigDecimal("150.00"));
+            
+            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
+            assertFalse(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Test empty symbol")
+        void testSymbolCannotBeBlank() {
+            request.setSymbol("   ");
+            request.setSide(OrderSide.BUY);
+            request.setQuantity(100);
+            request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("KEY-12345");
+            
+            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
+            assertFalse(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Test null side")
+        void testSideCannotBeNull() {
+            request.setSymbol("AAPL");
+            request.setSide(null);
+            request.setQuantity(100);
+            request.setPrice(new BigDecimal("150.00"));
+            request.setIdempotencyKey("KEY-12345");
+            
+            Set<ConstraintViolation<PlaceOrderRequest>> violations = validator.validate(request);
+            assertFalse(violations.isEmpty());
+        }
     }
+    
 }
