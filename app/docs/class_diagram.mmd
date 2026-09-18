@@ -1,82 +1,66 @@
 classDiagram
-    %% Enums
+direction TB
     class AccountStatus {
-        ACTIVE
-        SUSPENDED
-        CLOSED
+	    ACTIVE
+	    SUSPENDED
+	    CLOSED
     }
-    
+
     class OrderStatus {
-        NEW
-        FILLED
-        REJECTED
-        CANCELLED
+	    NEW
+	    FILLED
+	    REJECTED
+	    CANCELLED
     }
-    
-    class OrderSide {
-        BUY
-        SELL
-        apply(current: long, orderQty: long): long
-    }
-    
-    %% Value Objects
+
     class Money {
-        -amount: BigDecimal
-        -currency: String
-        +add(Money): Money
-        +subtract(Money): Money
-        +isPositive(): boolean
+	    -amount: BigDecimal
+	    -currency: String
     }
-    
-    %% Models
+
     class Account {
-        -accountId: Long
-        -holderName: String
-        -cashBalance: Money
-        -status: AccountStatus
-        -version: Long
-        +debit(Money): Account
-        +credit(Money): Account
-        +updateStatus(AccountStatus): Account
-        +isActive(): boolean
+	    -accountId: Long
+	    -holderName: String
+	    -cashBalance: Money
+	    -status: AccountStatus
+	    -version: Long
+	    -lastUpdated: LocalDateTime
     }
-    
+
     class Instrument {
-        -id: String
-        -symbol: String
-        -name: String
-        -currency: String
-        -tradable: boolean
+	    -id: String
+	    -symbol: String
+	    -name: String
+	    -assetClass: String
+	    -currency: String
+	    -tradable: boolean
     }
-    
+
     class Order {
-        -id: UUID
-        -accountId: Long
-        -symbol: String
-        -side: OrderSide
-        -quantity: long
-        -price: BigDecimal
-        -status: OrderStatus
+	    -id: UUID
+	    -accountId: Long
+	    -symbol: String
+	    -quantity: long
+	    -price: BigDecimal
+	    -status: OrderStatus
+	    -createdOn: LocalDateTime
+	    -idempotencyKey: String
     }
-    
+
     class Position {
-        -id: Long
-        -accountId: Long
-        -instrumentId: String
-        -quantity: long
+	    -accountId: Long
+	    -symbol: String
+	    -quantity: long
+	    -averageCost: BigDecimal
     }
-    
-    %% Interfaces
-    class AccountStatusValidator {
-        <<interface>>
-        +validateCanDebit(AccountStatus): void
-        +validateCanCredit(AccountStatus): void
-    }
-    
-    %% Relationships
+
     Account --> Money : has
     Account --> AccountStatus : has
-    Account --> AccountStatusValidator : uses
-    Order --> OrderSide : has
+    Account "1" --> "many" Order : places
+    Account "1" --> "many" Position : has
+    Order --> Account : references via accountId
     Order --> OrderStatus : has
-    Position --> Instrument : references
+    Order --> Position : affects
+    Order --> Instrument : trades
+    Position --> Account : references via accountId
+    Position --> Instrument : holds
