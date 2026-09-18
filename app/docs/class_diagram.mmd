@@ -35,6 +35,8 @@ classDiagram
         -cashBalance: Money
         -status: AccountStatus
         -version: Long
+        -lastUpdated: LocalDateTime
+        -statusValidator: AccountStatusValidator
         +debit(Money): Account
         +credit(Money): Account
         +updateStatus(AccountStatus): Account
@@ -45,8 +47,10 @@ classDiagram
         -id: String
         -symbol: String
         -name: String
+        -assetClass: String
         -currency: String
         -tradable: boolean
+        +isTradable(): Boolean
     }
     
     class Order {
@@ -57,13 +61,16 @@ classDiagram
         -quantity: long
         -price: BigDecimal
         -status: OrderStatus
+        -createdOn: LocalDateTime
+        -idempotencyKey: String
+        +setStatus(OrderStatus): void
     }
     
     class Position {
-        -id: Long
         -accountId: Long
-        -instrumentId: String
+        -symbol: String
         -quantity: long
+        -averageCost: BigDecimal
     }
     
     %% Interfaces
@@ -77,6 +84,10 @@ classDiagram
     Account --> Money : has
     Account --> AccountStatus : has
     Account --> AccountStatusValidator : uses
+    Account "1" --> "many" Order : places
+    Account "1" --> "many" Position : has
     Order --> OrderSide : has
     Order --> OrderStatus : has
-    Position --> Instrument : references
+    Order --> Position : affects
+    Order --> Instrument : trades
+    Position --> Instrument : holds
