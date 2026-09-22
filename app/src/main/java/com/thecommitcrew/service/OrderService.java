@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import com.thecommitcrew.domain.enums.OrderSide;
 import com.thecommitcrew.domain.enums.OrderStatus;

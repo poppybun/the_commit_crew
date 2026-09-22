@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,6 +10,7 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.validator.DefaultAccountStatusValidator;
+import com.thecommitcrew.service.OrderService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
