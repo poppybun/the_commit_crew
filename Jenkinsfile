@@ -153,7 +153,21 @@ pipeline {
             }
         }
         stage('Smoke Test') {
-            steps { sh 'docker run --rm the-commit-crew:${BUILD_NUMBER}' }
+            steps {
+                sh '''
+                    CONTAINER_ID=$(docker run -d the-commit-crew:${BUILD_NUMBER})
+                    sleep 5
+                    if docker exec $CONTAINER_ID curl -f http://localhost:8081/actuator/health; then
+                        echo "Health check passed"
+                    else
+                        echo "Health check failed"
+                        docker logs $CONTAINER_ID
+                        docker rm -f $CONTAINER_ID
+                        exit 1
+                    fi
+                    docker rm -f $CONTAINER_ID
+                '''
+            }
         }
         stage('Archive') {
             steps {
