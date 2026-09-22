@@ -23,6 +23,18 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "market_data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def group_price_history(prices: pd.DataFrame) -> pd.DataFrame:
+    """Return price history ordered by ticker and date.
+
+    Args:
+        prices: Raw or normalized price history records.
+
+    Returns:
+        A copy of the input records ordered by ticker then date.
+    """
+    return prices.sort_values(["ticker", "date"]).reset_index(drop=True)
+
+
 def fetch_price_history(tickers: list[str]) -> pd.DataFrame:
     """Fetch historical price data from yfinance for given tickers.
 
@@ -70,6 +82,8 @@ def fetch_price_history(tickers: list[str]) -> pd.DataFrame:
     missing_tickers = [ticker for ticker in tickers if ticker not in found_tickers]
     if missing_tickers:
         raise ValueError(f"Price history is missing tickers: {missing_tickers}")
+
+    prices = group_price_history(prices)
 
     logger.info("Fetched %s price history rows", len(prices))
     return prices
@@ -151,17 +165,28 @@ def fetch_ticker_metadata(tickers: list[str]) -> pd.DataFrame:
     return metadata
 
 
-def save_dataframes(prices: pd.DataFrame, metadata: pd.DataFrame) -> None:
-    """Persist market data extracts to CSV files.
+def save_price_history(prices: pd.DataFrame) -> None:
+    """Persist price history to CSV.
 
     Args:
         prices: Price history records.
+    """
+    grouped_prices = group_price_history(prices)
+
+    logger.info("Writing price history to %s", DATA_DIR / "price_history.csv")
+    grouped_prices.to_csv(DATA_DIR / "price_history.csv", index=False)
+
+
+def save_ticker_metadata(metadata: pd.DataFrame) -> None:
+    """Persist ticker metadata to CSV.
+
+    Args:
         metadata: Ticker metadata records.
     """
-    logger.info("Writing price history to %s", DATA_DIR / "price_history.csv")
-    prices.to_csv(DATA_DIR / "price_history.csv", index=False)
     logger.info("Writing ticker metadata to %s", DATA_DIR / "ticker_metadata.csv")
-    metadata.to_csv(DATA_DIR / "ticker_metadata.csv", index=False)
+    metadata.sort_values(["ticker"]).reset_index(drop=True).to_csv(
+        DATA_DIR / "ticker_metadata.csv", index=False
+    )
 
 
 def main() -> None:
@@ -169,8 +194,10 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     prices = fetch_price_history(all_tickers)
+    save_price_history(prices)
+    
     metadata = fetch_ticker_metadata(all_tickers)
-    save_dataframes(prices, metadata)
+    save_ticker_metadata(metadata)
 
 if __name__ == "__main__":
     main()
