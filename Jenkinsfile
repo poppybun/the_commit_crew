@@ -155,17 +155,23 @@ pipeline {
         stage('Smoke Test') {
             steps {
                 sh '''
-                    CONTAINER_ID=$(docker run -d the-commit-crew:${BUILD_NUMBER})
-                    sleep 5
-                    if docker exec $CONTAINER_ID curl -f http://localhost:8081/actuator/health; then
-                        echo "Health check passed"
-                    else
-                        echo "Health check failed"
-                        docker logs $CONTAINER_ID
-                        docker rm -f $CONTAINER_ID
-                        exit 1
-                    fi
+                    CONTAINER_ID=$(docker run -d -p 8081:8081 the-commit-crew:${BUILD_NUMBER})
+                    
+                    echo "Waiting for Spring Boot to start..."
+                    for i in {1..30}; do
+                        if curl -f http://localhost:8081/actuator/health > /dev/null 2>&1; then
+                            echo "Health check passed"
+                            docker rm -f $CONTAINER_ID
+                            exit 0
+                        fi
+                        echo "Attempt $i/30: Waiting for application to be ready..."
+                        sleep 1
+                    done
+                    
+                    echo "Health check failed"
+                    docker logs $CONTAINER_ID
                     docker rm -f $CONTAINER_ID
+                    exit 1
                 '''
             }
         }
