@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +15,7 @@ import com.thecommitcrew.domain.enums.OrderStatus;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.model.Position;
+import com.thecommitcrew.service.PositionService;
 
 public class PositionServiceTest {
 
