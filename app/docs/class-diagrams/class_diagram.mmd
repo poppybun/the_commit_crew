@@ -1,0 +1,66 @@
+classDiagram
+direction TB
+    class AccountStatus {
+	    ACTIVE
+	    SUSPENDED
+	    CLOSED
+    }
+
+    class OrderStatus {
+	    NEW
+	    FILLED
+	    REJECTED
+	    CANCELLED
+    }
+
+    class Money {
+	    -amount: BigDecimal
+	    -currency: String
+    }
+
+    class Account {
+	    -accountId: Long
+	    -holderName: String
+	    -cashBalance: Money
+	    -status: AccountStatus
+	    -version: Long
+	    -lastUpdated: LocalDateTime
+    }
+
+    class Instrument {
+	    -id: String
+	    -symbol: String
+	    -name: String
+	    -assetClass: String
+	    -currency: String
+	    -tradable: boolean
+    }
+
+    class Order {
+	    -id: UUID
+	    -accountId: Long
+	    -symbol: String
+	    -quantity: long
+	    -price: BigDecimal
+	    -status: OrderStatus
+	    -createdOn: LocalDateTime
+	    -idempotencyKey: String
+    }
+
+    class Position {
+	    -accountId: Long
+	    -symbol: String
+	    -quantity: long
+	    -averageCost: BigDecimal
+    }
+
+    Account --> Money : has
+    Account --> AccountStatus : has
+    Account "1" --> "many" Order : places
+    Account "1" --> "many" Position : has
+    Order --> Account : references via accountId
+    Order --> OrderStatus : has
+    Order --> Position : affects
+    Order --> Instrument : trades
+    Position --> Account : references via accountId
+    Position --> Instrument : holds

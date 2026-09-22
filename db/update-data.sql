@@ -4,8 +4,7 @@ TRUNCATE TABLE positions RESTART IDENTITY CASCADE;
 TRUNCATE TABLE accounts RESTART IDENTITY CASCADE;
 TRUNCATE TABLE instruments RESTART IDENTITY CASCADE;
 
-
-\i /docker-entrypoint-initdb.d/db/seeds/instruments-data.sql
-\i /docker-entrypoint-initdb.d/db/seeds/accounts-data.sql
-\i /docker-entrypoint-initdb.d/db/seeds/positions-data.sql
-\i /docker-entrypoint-initdb.d/db/seeds/orders-data.sql
+\i /docker-entrypoint-initdb.d/seeds/instruments-data.sql
+\i /docker-entrypoint-initdb.d/seeds/accounts-data.sql
+\i /docker-entrypoint-initdb.d/seeds/positions-data.sql
+\i /docker-entrypoint-initdb.d/seeds/orders-data.sql

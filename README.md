@@ -61,8 +61,28 @@ docker-compose -p commitcrew-prod --env-file .env.prod exec db psql -U postgres 
 ```
 You should see the list of tables for each database.
 
+## Coding Conventions
+
+### Naming 
+- Classes: PascalCase (e.g. `UserService`)
+- Methods/variables: camelCase (e.g. `isActive`)
+- Constants: UPPER_SNAKE_CASE (e.g. `MAX_RETRY_ATTEMPTS`)
+- Tables: lower_snake_case (e.g. `accounts_example`)
+
+### Code Style
+- Indent: 1 tab
+- Line length: max 120 characters
+- One class per file
+
+### Git Workflow & Branch Protection
+- **Develop branch**: All pushes require a pull request with 1 team member approval
+- **Main branch**: Merges require 2 team member approvals before integration
+- Follow Git flow: features branch from `develop`, releases branch from `develop`, hotfixes branch from `main`
+
+
 ## Jenkins Pipeline available at
-[10.9.75.153:8080](http://10.9.75.153:8080)
+[10.9.75.153:8080](http://10.9.75.153:8080) (develop & feature/)<br />
+[10.9.70.90:8080](http://10.9.70.90:8080/job/the-commit-crew-main/) (main)
 
 ## Jira backlog:
 
