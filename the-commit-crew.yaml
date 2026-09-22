@@ -1,20 +1,24 @@
 openapi: 3.0.3
 info:
-  title: The Commit Crew Order Service
+  title: The Commit Crew Order Processing Service
   description: >
     Submits orders for validation and execution against a client's portfolio.
   version: 1.0.0
   license:
     name: Internal use only
+    url: https://example.com/license
 
 servers:
   - url: /api/v1
+  - url: /api/v2
 
 paths:
   /orders:
     post:
       summary: Submit an order for processing
       operationId: submitOrder
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -61,6 +65,8 @@ paths:
     get:
       summary: Retrieve account details
       operationId: getAccount
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -92,6 +98,8 @@ paths:
     get:
       summary: Retrieve account cash balance
       operationId: getAccountBalance
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -122,6 +130,8 @@ paths:
     get:
       summary: Retrieve account holdings
       operationId: getAccountPositions
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -156,6 +166,8 @@ paths:
     get:
       summary: Retrieve account order history
       operationId: getAccountOrders
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -190,6 +202,12 @@ paths:
 
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT authentication - to be implemented
   schemas:
     OrderRequest:
       type: object
