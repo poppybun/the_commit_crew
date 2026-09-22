@@ -13,7 +13,6 @@ import com.thecommitcrew.domain.model.Money;
 public class AccountResponseDTOTest {
 
     @Test
-    @DisplayName("Test response creation")
     void testAccountResponseCreation() {
         Long accountId = 1L;
         AccountStatus status = AccountStatus.ACTIVE;
@@ -29,7 +28,6 @@ public class AccountResponseDTOTest {
     }
 
     @Test
-    @DisplayName("Test all fields")
     void testAccountResponseFields() {
         Long accountId = 2L;
         AccountStatus status = AccountStatus.SUSPENDED;
