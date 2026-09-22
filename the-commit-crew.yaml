@@ -60,7 +60,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-
+  /orders/{id}:
+    delete:
+      summary: Cancel a working order
+      operationId: cancelOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Order cancelled successfully
+        '400':
+          description: Bad request - order cannot be cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /accounts/{id}:
     get:
       summary: Retrieve account details
