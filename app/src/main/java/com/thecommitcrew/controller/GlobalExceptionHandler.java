@@ -13,7 +13,7 @@ import com.thecommitcrew.domain.exception.InsufficientHoldingsException;
 import com.thecommitcrew.domain.exception.InstrumentNotFoundException;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     
     // 404 Not Found
