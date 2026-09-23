@@ -63,7 +63,7 @@ public class OrderService {
             request.idempotencyKey()
         );
 
-        validateOrder(order);
+        validateOrder(request);
 
         OrderStatus status = determineStatus(
             account,
@@ -76,7 +76,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
         if (savedOrder.getStatus() == OrderStatus.NEW) {
-            executeOrder(savedOrder);
+            executeLoadedOrder(savedOrder);
         }
 
         return savedOrder;
@@ -91,6 +91,25 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
+    }
+
+    public void validateOrder(PlaceOrderRequestDTO request) {
+        validateOrder(new Order(
+            UUID.randomUUID(),
+            request.accountId(),
+            request.symbol(),
+            request.side(),
+            request.quantity(),
+            request.price(),
+            OrderStatus.NEW,
+            LocalDateTime.now(),
+            request.idempotencyKey()
+        ));
+    }
+
+    @Transactional
+    public void executeOrder(UUID orderId) {
+        executeLoadedOrder(getOrder(orderId));
     }
 
     private void validateOrder(Order order) {
@@ -116,7 +135,7 @@ public class OrderService {
         }
     }
 
-    private void executeOrder(Order order) {
+    private void executeLoadedOrder(Order order) {
         if (order.getStatus() != OrderStatus.NEW) {
             throw new IllegalStateException("Only NEW orders can be executed");
         }
@@ -139,8 +158,7 @@ public class OrderService {
             );
         }
 
-        if (order.getSide() == OrderSide.BUY
-            && tradeValue.compareTo(account.getCashBalance().getAmount()) > 0) {
+        if (order.getSide() == OrderSide.BUY && tradeValue.compareTo(account.getCashBalance().getAmount()) > 0) {
             throw new InsufficientFundsException(
                 "Insufficient funds to buy " + order.getQuantity() + " shares of " + order.getSymbol()
             );
