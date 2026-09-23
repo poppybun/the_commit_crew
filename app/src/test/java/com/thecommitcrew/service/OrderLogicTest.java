@@ -10,7 +10,6 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.validator.DefaultAccountStatusValidator;
-import com.thecommitcrew.service.OrderService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
