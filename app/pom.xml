@@ -13,7 +13,7 @@
     <artifactId>the-commit-crew</artifactId>
     <version>0.1.0</version>
 
-     <name/>
+    <name/>
     <description/>
     <url/>
     <licenses>
@@ -145,6 +145,11 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

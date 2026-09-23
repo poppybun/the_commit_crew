@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -43,142 +45,168 @@ public class AccountControllerTest {
     private Money testBalance;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testBalance = new Money(new BigDecimal("10000.00"), TEST_CURRENCY);
         testAccount = new Account(
-        TEST_ACCOUNT_ID,
-        TEST_ACCOUNT_HOLDER,
-        testBalance,
-        AccountStatus.ACTIVE,
-        1L,
-        LocalDateTime.now(),
-        new com.thecommitcrew.domain.validator.DefaultAccountStatusValidator()
-    );
-    }
-
-    @Test
-    public void testGetAccount_Success() throws Exception {
-        when(accountService.getAccount(TEST_ACCOUNT_ID)).thenReturn(testAccount);
-
-        mockMvc.perform(get("/accounts/{id}", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
-            .andExpect(jsonPath("$.status").value("ACTIVE"));
-
-        verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
-    }
-
-    @Test
-    public void testGetAccount_NotFound() throws Exception {
-        when(accountService.getAccount(TEST_ACCOUNT_ID))
-            .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
-
-        mockMvc.perform(get("/accounts/{id}", TEST_ACCOUNT_ID))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
-
-        verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
-    }
-
-    @Test
-    public void testGetAccountBalance_Success() throws Exception {
-        when(accountService.getBalance(TEST_ACCOUNT_ID)).thenReturn(testBalance);
-
-        mockMvc.perform(get("/accounts/{id}/balance", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
-            .andExpect(jsonPath("$.cashBalance.amount").value("10000.0"));
-
-        verify(accountService, times(1)).getBalance(TEST_ACCOUNT_ID);
-    }
-
-    @Test
-    public void testGetAccountBalance_NotFound() throws Exception {
-        when(accountService.getBalance(TEST_ACCOUNT_ID))
-            .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
-
-        mockMvc.perform(get("/accounts/{id}/balance", TEST_ACCOUNT_ID))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
-    }
-
-    @Test
-    public void testGetAccountPositions_Success() throws Exception {
-        Position position = new Position(TEST_ACCOUNT_ID, "AAPL", 100L, new BigDecimal("150.00"));
-        List<Position> positions = List.of(position);
-
-        when(accountService.getPositions(TEST_ACCOUNT_ID)).thenReturn(positions);
-
-        mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].symbol").value("AAPL"))
-            .andExpect(jsonPath("$[0].quantity").value(100))
-            .andExpect(jsonPath("$[0].averageCost").value("150.0"));
-
-        verify(accountService, times(1)).getPositions(TEST_ACCOUNT_ID);
-    }
-
-    @Test
-    public void testGetAccountPositions_NotFound() throws Exception {
-        when(accountService.getPositions(TEST_ACCOUNT_ID))
-            .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
-
-        mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
-    }
-
-    @Test
-    public void testGetAccountOrders_Success() throws Exception {
-        Order order = new Order(
-            UUID.randomUUID(),
             TEST_ACCOUNT_ID,
-            "AAPL",
-            OrderSide.BUY,
-            100L,
-            new BigDecimal("150.0"),
-            OrderStatus.FILLED,
+            TEST_ACCOUNT_HOLDER,
+            testBalance,
+            AccountStatus.ACTIVE,
+            1L,
             LocalDateTime.now(),
-            "idempotency-key-123"
+            new com.thecommitcrew.domain.validator.DefaultAccountStatusValidator()
         );
-        List<Order> orders = List.of(order);
-
-        when(accountService.getOrders(TEST_ACCOUNT_ID)).thenReturn(orders);
-
-        mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].symbol").value("AAPL"))
-            .andExpect(jsonPath("$[0].quantity").value(100))
-            .andExpect(jsonPath("$[0].status").value("FILLED"));
-
-        verify(accountService, times(1)).getOrders(TEST_ACCOUNT_ID);
     }
 
-    @Test
-    public void testGetAccountOrders_NotFound() throws Exception {
-        when(accountService.getOrders(TEST_ACCOUNT_ID))
-            .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
+    @Nested
+    @DisplayName("GET /accounts/{id}")
+    class GetAccountEndpoint {
+        @Test
+        @DisplayName("Returns account successfully when found")
+        void returnsAccountWhenFound() throws Exception {
+            when(accountService.getAccount(TEST_ACCOUNT_ID)).thenReturn(testAccount);
 
-        mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
+            mockMvc.perform(get("/accounts/{id}", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+
+            verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
+        }
+
+        @Test
+        @DisplayName("Returns 404 when account not found")
+        void returns404WhenAccountNotFound() throws Exception {
+            when(accountService.getAccount(TEST_ACCOUNT_ID))
+                .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
+
+            mockMvc.perform(get("/accounts/{id}", TEST_ACCOUNT_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
+
+            verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
+        }
     }
 
-    @Test
-    public void testGetAccountPositions_Empty() throws Exception {
-        when(accountService.getPositions(TEST_ACCOUNT_ID)).thenReturn(List.of());
+    @Nested
+    @DisplayName("GET /accounts/{id}/balance")
+    class GetAccountBalanceEndpoint {
+        @Test
+        @DisplayName("Returns balance successfully when account found")
+        void returnsBalanceWhenAccountFound() throws Exception {
+            when(accountService.getBalance(TEST_ACCOUNT_ID)).thenReturn(testBalance);
 
-        mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", org.hamcrest.Matchers.empty()));
+            mockMvc.perform(get("/accounts/{id}/balance", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
+                .andExpect(jsonPath("$.cashBalance.amount").value("10000.0"));
+
+            verify(accountService, times(1)).getBalance(TEST_ACCOUNT_ID);
+        }
+
+        @Test
+        @DisplayName("Returns 404 when account not found")
+        void returns404WhenAccountNotFound() throws Exception {
+            when(accountService.getBalance(TEST_ACCOUNT_ID))
+                .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
+
+            mockMvc.perform(get("/accounts/{id}/balance", TEST_ACCOUNT_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
+        }
     }
 
-    @Test
-    public void testGetAccountOrders_Empty() throws Exception {
-        when(accountService.getOrders(TEST_ACCOUNT_ID)).thenReturn(List.of());
+    @Nested
+    @DisplayName("GET /accounts/{id}/positions")
+    class GetAccountPositionsEndpoint {
+        @Test
+        @DisplayName("Returns positions successfully when account found")
+        void returnsPositionsWhenAccountFound() throws Exception {
+            Position position = new Position(TEST_ACCOUNT_ID, "AAPL", 100L, new BigDecimal("150.00"));
+            List<Position> positions = List.of(position);
 
-        mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$", org.hamcrest.Matchers.empty()));
+            when(accountService.getPositions(TEST_ACCOUNT_ID)).thenReturn(positions);
+
+            mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"))
+                .andExpect(jsonPath("$[0].quantity").value(100))
+                .andExpect(jsonPath("$[0].averageCost").value("150.0"));
+
+            verify(accountService, times(1)).getPositions(TEST_ACCOUNT_ID);
+        }
+
+        @Test
+        @DisplayName("Returns 404 when account not found")
+        void returns404WhenAccountNotFound() throws Exception {
+            when(accountService.getPositions(TEST_ACCOUNT_ID))
+                .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
+
+            mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Returns empty list when no positions exist")
+        void returnsEmptyListWhenNoPositionsExist() throws Exception {
+            when(accountService.getPositions(TEST_ACCOUNT_ID)).thenReturn(List.of());
+
+            mockMvc.perform(get("/accounts/{id}/positions", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.empty()));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /accounts/{id}/orders")
+    class GetAccountOrdersEndpoint {
+        @Test
+        @DisplayName("Returns orders successfully when account found")
+        void returnsOrdersWhenAccountFound() throws Exception {
+            Order order = new Order(
+                UUID.randomUUID(),
+                TEST_ACCOUNT_ID,
+                "AAPL",
+                OrderSide.BUY,
+                100L,
+                new BigDecimal("150.0"),
+                OrderStatus.FILLED,
+                LocalDateTime.now(),
+                "idempotency-key-123"
+            );
+            List<Order> orders = List.of(order);
+
+            when(accountService.getOrders(TEST_ACCOUNT_ID)).thenReturn(orders);
+
+            mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"))
+                .andExpect(jsonPath("$[0].quantity").value(100))
+                .andExpect(jsonPath("$[0].status").value("FILLED"));
+
+            verify(accountService, times(1)).getOrders(TEST_ACCOUNT_ID);
+        }
+
+        @Test
+        @DisplayName("Returns 404 when account not found")
+        void returns404WhenAccountNotFound() throws Exception {
+            when(accountService.getOrders(TEST_ACCOUNT_ID))
+                .thenThrow(new AccountNotFoundException("Account not found: " + TEST_ACCOUNT_ID));
+
+            mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Returns empty list when no orders exist")
+        void returnsEmptyListWhenNoOrdersExist() throws Exception {
+            when(accountService.getOrders(TEST_ACCOUNT_ID)).thenReturn(List.of());
+
+            mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.empty()));
+        }
     }
 }
