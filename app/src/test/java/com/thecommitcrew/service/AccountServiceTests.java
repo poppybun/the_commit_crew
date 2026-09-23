@@ -1,8 +1,4 @@
-<<<<<<< HEAD:app/src/test/java/com/thecommitcrew/domain/service/AccountServiceTests.java
-package com.thecommitcrew.domain.service;
-=======
 package com.thecommitcrew.service;
->>>>>>> a4ee0ee (refactor: move service layer to root level for cleaner architecture):app/src/test/java/com/thecommitcrew/service/AccountServiceTests.java
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,20 +20,12 @@ import com.thecommitcrew.domain.enums.AccountStatus;
 import com.thecommitcrew.domain.exception.AccountNotFoundException;
 import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
-<<<<<<< HEAD:app/src/test/java/com/thecommitcrew/domain/service/AccountServiceTests.java
-import com.thecommitcrew.domain.model.Order;
-=======
->>>>>>> a4ee0ee (refactor: move service layer to root level for cleaner architecture):app/src/test/java/com/thecommitcrew/service/AccountServiceTests.java
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.validator.AccountStatusValidator;
 import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.repository.OrderRepository;
 import com.thecommitcrew.persistence.repository.PositionRepository;
 
-<<<<<<< HEAD:app/src/test/java/com/thecommitcrew/domain/service/AccountServiceTests.java
-=======
-
->>>>>>> a4ee0ee (refactor: move service layer to root level for cleaner architecture):app/src/test/java/com/thecommitcrew/service/AccountServiceTests.java
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
 
