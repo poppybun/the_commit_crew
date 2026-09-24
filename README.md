@@ -15,11 +15,11 @@ We decided to go with git flow branching strategy because we expect to have many
 1. Clone the repository:
 Windows:
 ```bash
-git clone https://github.com/poppybun/the_commit_crew.git
+git clone https://github.com/the-commit-crew-leap/the_commit_crew.git
 ```
 Linux:
 ```bash
-git clone git@github.com:poppybun/the_commit_crew.git
+git clone git@github.com:the-commit-crew-leap/the_commit_crew.git
 ```
 2. Create .env.dev and .env.prod files in the root directory. They should look something like this:
 
