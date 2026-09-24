@@ -3,6 +3,7 @@ package com.thecommitcrew.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.thecommitcrew.domain.dto.ErrorResponseDTO;
 import com.thecommitcrew.domain.exception.AccountNotActiveException;
@@ -61,9 +62,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(400).body(error);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalState(IllegalStateException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("INVALID_STATE", e.getMessage());
+        return ResponseEntity.status(400).body(error);
+    }
+
     @ExceptionHandler(NegativePriceException.class)
     public ResponseEntity<ErrorResponseDTO> handleNegativePrice(NegativePriceException e) {
         ErrorResponseDTO error = new ErrorResponseDTO("INVALID_PRICE", e.getMessage());
+        return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .findFirst()
+            .orElse("Invalid request body");
+        ErrorResponseDTO error = new ErrorResponseDTO("VALIDATION_ERROR", message);
         return ResponseEntity.status(400).body(error);
     }
 

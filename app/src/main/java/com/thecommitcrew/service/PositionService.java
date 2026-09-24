@@ -2,11 +2,15 @@ package com.thecommitcrew.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import org.springframework.stereotype.Component;
+
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.enums.OrderSide;
 import com.thecommitcrew.domain.exception.NegativePriceException;
 
+@Component 
 public class PositionService {
     private static final BigDecimal ZERO = BigDecimal.ZERO;
     private static final long ZERO_QUANTITY = 0L;

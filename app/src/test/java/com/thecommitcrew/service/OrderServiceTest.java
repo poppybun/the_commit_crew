@@ -34,6 +34,10 @@ import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.mapper.InstrumentMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
+import com.thecommitcrew.persistence.mapper.AccountMapper;
+import com.thecommitcrew.persistence.mapper.InstrumentMapper;
+import com.thecommitcrew.persistence.entity.AccountEntity;
+import com.thecommitcrew.persistence.entity.InstrumentEntity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class OrderServiceTest {
 
     private static final Long ACCOUNT_ID = 1L;
@@ -61,19 +66,23 @@ class OrderServiceTest {
     @Mock
     private InstrumentRepository instrumentRepository;
     @Mock
+    private AccountMapper accountMapper;
+    @Mock
     private InstrumentMapper instrumentMapper;
     @Mock
-    private AccountMapper accountMapper;
+    private PositionService positionService;
 
     private OrderService orderService;
     private Account activeAccount;
+    private AccountEntity activeAccountEntity;
     private Instrument tradableInstrument;
-    private AccountEntity accountEntity;
-    private InstrumentEntity instrumentEntity;
+    private InstrumentEntity tradableInstrumentEntity;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderMapper, accountRepository, positionMapper, instrumentRepository, instrumentMapper, accountMapper);
+        orderService = new OrderService(orderMapper, accountRepository, positionMapper, 
+                                       instrumentRepository, accountMapper, instrumentMapper, positionService);
+        
         activeAccount = new Account(
             ACCOUNT_ID,
             "Jane Doe",
@@ -83,6 +92,16 @@ class OrderServiceTest {
             LocalDateTime.now(),
             new DefaultAccountStatusValidator()
         );
+        
+        activeAccountEntity = new AccountEntity(
+            ACCOUNT_ID.toString(),
+            "Jane Doe",
+            new BigDecimal("10000.00"),
+            AccountStatus.ACTIVE,
+            1,
+            LocalDateTime.now()
+        );
+        
         tradableInstrument = new Instrument(
             "instr-1",
             SYMBOL,
@@ -91,35 +110,31 @@ class OrderServiceTest {
             true,
             new BasicInstrumentSymbolValidator()
         );
-        accountEntity = new AccountEntity(
-            ACCOUNT_ID.toString(),
-            "Jane Doe",
-            new BigDecimal("10000.00"),
-            AccountStatus.ACTIVE,
-            1,
-            LocalDateTime.now()
-        );
-        instrumentEntity = new InstrumentEntity(
+        
+        tradableInstrumentEntity = new InstrumentEntity(
             SYMBOL,
             "Apple Inc.",
             AssetClass.EQUITY,
             "USD",
             true
         );
+        
     }
 
     @Test
     void placeOrder_buyWithFunds_fillsOrder() {
         PlaceOrderRequestDTO request = request(ACCOUNT_ID, SYMBOL, OrderSide.BUY, 10L, "100.00", IDEMPOTENCY_KEY);
 
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(accountEntity));
-        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(instrumentEntity));
-        when(accountMapper.toDomain(accountEntity)).thenReturn(activeAccount);
-        when(instrumentMapper.toDomain(instrumentEntity)).thenReturn(tradableInstrument);
-        when(accountMapper.toEntity(any(Account.class))).thenReturn(accountEntity);
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.of(activeAccountEntity));
+        when(accountMapper.toDomain(activeAccountEntity)).thenReturn(activeAccount);
+        when(accountMapper.toEntity(any(Account.class))).thenReturn(activeAccountEntity);
+        when(instrumentMapper.toDomain(tradableInstrumentEntity)).thenReturn(tradableInstrument);
+        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of());
         when(orderMapper.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Position newPosition = new Position(ACCOUNT_ID, SYMBOL, 10L, new BigDecimal("100.00"));
+        when(positionService.applyOrder(any(Position.class), any(Order.class))).thenReturn(newPosition);
 
         Order order = orderService.placeOrder(request);
 
@@ -135,10 +150,10 @@ class OrderServiceTest {
     void placeOrder_buyWithoutFunds_rejectsOrder() {
         PlaceOrderRequestDTO request = request(ACCOUNT_ID, SYMBOL, OrderSide.BUY, 100L, "1000.00", IDEMPOTENCY_KEY);
 
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(accountEntity));
-        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(instrumentEntity));
-        when(accountMapper.toDomain(accountEntity)).thenReturn(activeAccount);
-        when(instrumentMapper.toDomain(instrumentEntity)).thenReturn(tradableInstrument);
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.of(activeAccountEntity));
+        when(accountMapper.toDomain(activeAccountEntity)).thenReturn(activeAccount);
+        when(instrumentMapper.toDomain(tradableInstrumentEntity)).thenReturn(tradableInstrument);
+        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of());
         when(orderMapper.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -154,7 +169,7 @@ class OrderServiceTest {
     void placeOrder_missingAccount_throwsException() {
         PlaceOrderRequestDTO request = request(ACCOUNT_ID, SYMBOL, OrderSide.BUY, 10L, "100.00", IDEMPOTENCY_KEY);
 
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.empty());
 
         assertThrows(AccountNotFoundException.class, () -> orderService.placeOrder(request));
     }
@@ -186,8 +201,8 @@ class OrderServiceTest {
     void validateOrder_validRequest_doesNotThrow() {
         PlaceOrderRequestDTO request = request(ACCOUNT_ID, SYMBOL, OrderSide.BUY, 10L, "100.00", IDEMPOTENCY_KEY);
 
-        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(instrumentEntity));
-        when(instrumentMapper.toDomain(instrumentEntity)).thenReturn(tradableInstrument);
+        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
+        when(instrumentMapper.toDomain(tradableInstrumentEntity)).thenReturn(tradableInstrument);
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of());
 
         assertDoesNotThrow(() -> orderService.validateOrder(request));
@@ -198,8 +213,8 @@ class OrderServiceTest {
         PlaceOrderRequestDTO request = request(ACCOUNT_ID, SYMBOL, OrderSide.BUY, 10L, "100.00", IDEMPOTENCY_KEY);
         Order existingOrder = existingOrder(UUID.randomUUID(), OrderSide.BUY, OrderStatus.NEW, 5L, "99.00", IDEMPOTENCY_KEY);
 
-        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(instrumentEntity));
-        when(instrumentMapper.toDomain(instrumentEntity)).thenReturn(tradableInstrument);
+        when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
+        when(instrumentMapper.toDomain(tradableInstrumentEntity)).thenReturn(tradableInstrument);
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of(existingOrder));
 
         assertThrows(DuplicateOrderException.class, () -> orderService.validateOrder(request));
@@ -220,10 +235,12 @@ class OrderServiceTest {
         Order order = existingOrder(orderId, OrderSide.BUY, OrderStatus.NEW, 10L, "100.00", IDEMPOTENCY_KEY);
 
         when(orderMapper.findById(orderId)).thenReturn(Optional.of(order));
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(accountEntity));
-        when(accountMapper.toDomain(accountEntity)).thenReturn(activeAccount);
-        when(accountMapper.toEntity(any(Account.class))).thenReturn(accountEntity);
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.of(activeAccountEntity));
+        when(accountMapper.toDomain(activeAccountEntity)).thenReturn(activeAccount);
+        when(accountMapper.toEntity(any(Account.class))).thenReturn(activeAccountEntity);
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
+        Position newPosition = new Position(ACCOUNT_ID, SYMBOL, 10L, new BigDecimal("100.00"));
+        when(positionService.applyOrder(any(Position.class), any(Order.class))).thenReturn(newPosition);
 
         orderService.executeOrder(orderId);
 
@@ -239,8 +256,8 @@ class OrderServiceTest {
         Order order = existingOrder(orderId, OrderSide.SELL, OrderStatus.NEW, 10L, "100.00", IDEMPOTENCY_KEY);
 
         when(orderMapper.findById(orderId)).thenReturn(Optional.of(order));
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(accountEntity));
-        when(accountMapper.toDomain(accountEntity)).thenReturn(activeAccount);
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.of(activeAccountEntity));
+        when(accountMapper.toDomain(activeAccountEntity)).thenReturn(activeAccount);
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
 
         assertThrows(InsufficientHoldingsException.class, () -> orderService.executeOrder(orderId));
@@ -252,8 +269,8 @@ class OrderServiceTest {
         Order order = existingOrder(orderId, OrderSide.BUY, OrderStatus.NEW, 200L, "100.00", IDEMPOTENCY_KEY);
 
         when(orderMapper.findById(orderId)).thenReturn(Optional.of(order));
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(Optional.of(accountEntity));
-        when(accountMapper.toDomain(accountEntity)).thenReturn(activeAccount);
+        when(accountRepository.findByAccountId(String.valueOf(ACCOUNT_ID))).thenReturn(Optional.of(activeAccountEntity));
+        when(accountMapper.toDomain(activeAccountEntity)).thenReturn(activeAccount);
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
 
         assertThrows(InsufficientFundsException.class, () -> orderService.executeOrder(orderId));

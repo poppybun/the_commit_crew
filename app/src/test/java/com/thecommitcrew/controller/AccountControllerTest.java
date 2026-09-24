@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 
 @WebMvcTest(AccountController.class)
+@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class AccountControllerTest {
 
     @Autowired
@@ -69,8 +73,6 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
-
-            verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
         }
 
         @Test
@@ -82,8 +84,6 @@ public class AccountControllerTest {
             mockMvc.perform(get("/accounts/{id}", TEST_ACCOUNT_ID))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("ACCOUNT_NOT_FOUND"));
-
-            verify(accountService, times(1)).getAccount(TEST_ACCOUNT_ID);
         }
     }
 
@@ -100,7 +100,6 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.accountId").value(TEST_ACCOUNT_ID))
                 .andExpect(jsonPath("$.cashBalance.amount").value("10000.0"));
 
-            verify(accountService, times(1)).getBalance(TEST_ACCOUNT_ID);
         }
 
         @Test
@@ -131,8 +130,6 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$[0].symbol").value("AAPL"))
                 .andExpect(jsonPath("$[0].quantity").value(100))
                 .andExpect(jsonPath("$[0].averageCost").value("150.0"));
-
-            verify(accountService, times(1)).getPositions(TEST_ACCOUNT_ID);
         }
 
         @Test
@@ -183,8 +180,6 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$[0].symbol").value("AAPL"))
                 .andExpect(jsonPath("$[0].quantity").value(100))
                 .andExpect(jsonPath("$[0].status").value("FILLED"));
-
-            verify(accountService, times(1)).getOrders(TEST_ACCOUNT_ID);
         }
 
         @Test

@@ -1,6 +1,9 @@
 package com.thecommitcrew.domain.validator;
+import org.springframework.stereotype.Component;
+
 import com.thecommitcrew.domain.enums.AccountStatus;
 
+@Component 
 public class DefaultAccountStatusValidator implements AccountStatusValidator {
     
     /**

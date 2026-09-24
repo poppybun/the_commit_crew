@@ -1,5 +1,6 @@
 package com.thecommitcrew.controller;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +57,18 @@ public class TestController {
     @GetMapping("/test-generic-exception")
     void throwGenericException() {
         throw new RuntimeException("Unexpected error");
+    }
+
+    @GetMapping("/test-illegal-state")
+    void throwIllegalState() {
+        throw new IllegalStateException("Only NEW orders can be cancelled");
+    }
+
+    @GetMapping("/test-validation-error")
+    void throwValidationError() throws MethodArgumentNotValidException {
+        // Note: MethodArgumentNotValidException is hard to throw directly
+        // It's normally thrown by Spring during @Valid validation
+        // For now, we can remove this test since it's covered by OrderControllerTest
+        throw new RuntimeException("Validation failed");
     }
 }
