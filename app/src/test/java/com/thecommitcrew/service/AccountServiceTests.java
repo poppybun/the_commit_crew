@@ -22,6 +22,8 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.validator.AccountStatusValidator;
+import com.thecommitcrew.persistence.entity.AccountEntity;
+import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.repository.OrderRepository;
 import com.thecommitcrew.persistence.repository.PositionRepository;
@@ -41,32 +43,46 @@ public class AccountServiceTests {
     private OrderRepository orderRepository;
     @Mock
     private AccountStatusValidator statusValidator;
+    @Mock
+    private AccountMapper accountMapper;
 
     private AccountService accountService;
     private Account testAccount;
+    private AccountEntity testAccountEntity;
 
     @BeforeEach
     public void setUp() {
-        accountService = new AccountService(accountRepository, positionRepository, orderRepository);
+        accountService = new AccountService(accountRepository, positionRepository, orderRepository, accountMapper);
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             "John Doe",
             new Money(new BigDecimal("10000.00")),
             AccountStatus.ACTIVE,
-            1L,
+            1,
             LocalDateTime.now(),
             statusValidator
+        );
+
+        testAccountEntity = new AccountEntity(
+            TEST_ACCOUNT_ID.toString(),
+            "John Doe",
+            new BigDecimal("10000.00"),
+            AccountStatus.ACTIVE,
+            1,
+            LocalDateTime.now()
         );
     }
 
     @Test
     void getAccount_WithValidId_ReturnsAccount() {
-        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccountEntity));
+        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
 
         Account result = accountService.getAccount(TEST_ACCOUNT_ID);
 
         assertEquals(testAccount, result);
         verify(accountRepository).findById(TEST_ACCOUNT_ID);
+        verify(accountMapper).toDomain(testAccountEntity);
     }
 
     @Test
@@ -85,7 +101,8 @@ public class AccountServiceTests {
             createPosition("AAPL", 10L),
             createPosition("GOOGL", 5L)
         );
-        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccountEntity));
+        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
         when(positionRepository.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
 
         List<Position> result = accountService.getPositions(TEST_ACCOUNT_ID);
@@ -105,7 +122,8 @@ public class AccountServiceTests {
 
     @Test
     void getBalance_ReturnsAccountBalance() {
-        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccountEntity));
+        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
 
         Money result = accountService.getBalance(TEST_ACCOUNT_ID);
 
