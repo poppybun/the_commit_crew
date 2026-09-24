@@ -21,11 +21,7 @@ Linux:
 ```bash
 git clone git@github.com:poppybun/the_commit_crew.git
 ```
-2. The databases (the-commit-crew-prod & the-commit-crew-dev) can be connected to through pgAdmin.
-Steps 3-5 outline how to run a copy of either database locally and can be skipped.
-
-3. To run copies of the databases locally, create .env.dev and .env.prod files in the root directory of the project.
-They should look something like this:
+2. Create .env.dev and .env.prod files in the root directory. They should look something like this:
 
 .env.dev:
 ```bash
@@ -37,9 +33,11 @@ POSTGRES_PASSWORD=<db password here>
 ```bash
 POSTGRES_DB=the-commit-crew-prod
 POSTGRES_PASSWORD=<db password here>
-```  
+```
 
-4. Run docker-compose:<br />
+3. To run both the app and local database together:
+
+3.1 Run docker-compose:<br />
 dev:
 ```bash 
 docker-compose -p commitcrew-dev  --env-file .env.dev  up -d --build
@@ -49,7 +47,7 @@ prod:
 docker-compose -p commitcrew-prod --env-file .env.prod up -d --build
 ```
 
-5. Verify: <br />
+3.2 Verify: <br />
 dev:
 ```bash
 docker-compose -p commitcrew-dev  --env-file .env.dev  exec db psql -U postgres -d the-commit-crew-dev  -c "\dt"
@@ -59,7 +57,14 @@ prod:
 ```bash
 docker-compose -p commitcrew-prod --env-file .env.prod exec db psql -U postgres -d the-commit-crew-prod -c "\dt"
 ```
-You should see the list of tables for each database.
+You should see the list of tables for each database. The app will be accessible at http://localhost:8081 on your machine and http://your-machine-ip:8081 from other machines.
+
+4. To run only the app and access a shared dev database:
+
+4.1 Run this command (make sure to add the password from you .env file):
+```bash
+POSTGRES_HOST=10.9.75.153 POSTGRES_DB=the-commit-crew-dev POSTGRES_PASSWORD=<password> docker-compose -p commitcrew-dev up app --no-deps -d --build
+```
 
 ## Coding Conventions
 
