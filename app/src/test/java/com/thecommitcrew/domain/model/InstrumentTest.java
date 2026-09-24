@@ -12,8 +12,6 @@ import com.thecommitcrew.domain.validator.InstrumentSymbolValidator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Currency;
-
 public class InstrumentTest {
     
     private Instrument instrument;
@@ -31,7 +29,7 @@ public class InstrumentTest {
         assertEquals("AAPL", instrument.getSymbol());
         assertEquals("Apple Inc.", instrument.getName());
         assertEquals(AssetClass.EQUITY, instrument.getAssetClass());
-        assertEquals(Currency.getInstance("USD"), instrument.getCurrency());
+        assertEquals("USD", instrument.getCurrency());
         assertTrue(instrument.isTradable());
     }
 
@@ -106,7 +104,7 @@ public class InstrumentTest {
         
         @Test
         public void testGetCurrency() {
-            assertEquals(Currency.getInstance("USD"), instrument.getCurrency());
+            assertEquals("USD", instrument.getCurrency());
         }
         
         @Test
