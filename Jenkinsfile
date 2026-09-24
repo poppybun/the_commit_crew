@@ -184,6 +184,23 @@ pipeline {
             steps { sh 'mvn -B test -f app/pom.xml' }
                 post { always { junit 'app/target/surefire-reports/*.xml' } }
         }
-
+        stage('Integration Tests') {
+            when {
+                not {
+                    anyOf {
+                        branch 'main'
+                        branch 'origin/main'
+                    }
+                }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'env-dev-file', variable: 'ENV_FILE_PATH')]) {
+                    sh '''
+                        chmod +x integration-test.sh
+                        ./integration-test.sh the-commit-crew:${BUILD_NUMBER} dev
+                    '''
+                }
+            }
+        }
     }
 }
