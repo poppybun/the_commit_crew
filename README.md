@@ -87,3 +87,10 @@ You should see the list of tables for each database.
 ## Jira backlog:
 
 [The Commit Crew](https://thecommitcrew.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog)
+
+## Temp running integration script locally
+
+docker-compose -p commitcrew-dev --env-file .env.dev up -d db
+docker build -t the-commit-crew:latest .
+chmod +x integration-test.sh
+./integration-test.sh
