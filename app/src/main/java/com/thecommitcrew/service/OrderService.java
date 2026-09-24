@@ -17,6 +17,8 @@ import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.repository.InstrumentRepository;
+import com.thecommitcrew.persistence.mapper.AccountMapper;
+import com.thecommitcrew.persistence.mapper.InstrumentMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
 import java.math.BigDecimal;
@@ -35,14 +37,19 @@ public class OrderService {
     private final AccountRepository accountRepository;
     private final PositionMapper positionMapper;
     private final InstrumentRepository instrumentRepository;
+    private final InstrumentMapper instrumentMapper;
+    private final AccountMapper accountMapper;
     private final PositionService positionService;
 
     public OrderService(OrderMapper orderMapper, AccountRepository accountRepository,
-                        PositionMapper positionMapper, InstrumentRepository instrumentRepository) {
+                    PositionMapper positionMapper, InstrumentRepository instrumentRepository,
+                    InstrumentMapper instrumentMapper, AccountMapper accountMapper) {
         this.orderMapper = orderMapper;
         this.accountRepository = accountRepository;
         this.positionMapper = positionMapper;
         this.instrumentRepository = instrumentRepository;
+        this.instrumentMapper = instrumentMapper;
+        this.accountMapper = accountMapper;
         this.positionService = new PositionService();
     }
 
@@ -118,9 +125,10 @@ public class OrderService {
         }
 
         Instrument instrument = instrumentRepository.findBySymbol(order.getSymbol())
+            .map(instrumentMapper::toDomain)
             .orElseThrow(() -> new InstrumentNotFoundException(
                 "Instrument not found for symbol: " + order.getSymbol()
-            ));
+        ));
 
         if (!instrument.isTradable()) {
             throw new IllegalStateException("Instrument is not tradable: " + order.getSymbol());
@@ -164,11 +172,11 @@ public class OrderService {
             );
         }
 
-        Money tradeAmount = new Money(tradeValue, account.getCashBalance().getCurrency());
+        Money tradeAmount = new Money(tradeValue);
         Account updatedAccount = order.getSide() == OrderSide.BUY
             ? account.debit(tradeAmount)
             : account.credit(tradeAmount);
-        accountRepository.save(updatedAccount);
+        accountRepository.save(accountMapper.toEntity(updatedAccount));
 
         Position basePosition = existingPosition.orElseGet(() -> new Position(
             order.getAccountId(),
@@ -200,6 +208,7 @@ public class OrderService {
 
     private Account getAccount(Long accountId) {
         return accountRepository.findById(accountId)
+            .map(accountMapper::toDomain)
             .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountId));
     }
 

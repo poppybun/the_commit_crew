@@ -2,34 +2,34 @@ package com.thecommitcrew;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.thecommitcrew.persistence.repository.InstrumentRepository;
 import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.mapper.InstrumentMapper;
+import com.thecommitcrew.persistence.mapper.OrderMapper;
+import com.thecommitcrew.persistence.mapper.PositionMapper;
 import com.thecommitcrew.persistence.repository.AccountRepository;
-import com.thecommitcrew.persistence.repository.OrderRepository;
-import com.thecommitcrew.persistence.repository.PositionRepository;
 
 @SpringBootTest()
 class MainTests {
 
-  @MockitoBean
+  @MockBean
   private InstrumentRepository instrumentRepository;
   
-  @MockitoBean
+  @MockBean
   private AccountRepository accountRepository;
   
-  @MockitoBean
-  private OrderRepository orderRepository;
+  @MockBean
+  private OrderMapper orderMapper;
   
-  @MockitoBean
-  private PositionRepository positionRepository;
+  @MockBean
+  private PositionMapper positionMapper;
   
-  @MockitoBean
+  @MockBean
   private AccountMapper accountMapper;
   
-  @MockitoBean
+  @MockBean
   private InstrumentMapper instrumentMapper;
 
   @Test
