@@ -13,7 +13,7 @@ public class BalanceResponseDTOTest {
     @Test
     void testBalanceResponseCreation() {
         Long accountId = 1L;
-        Money cashBalance = new Money(new BigDecimal("10000.00"));
+        Money cashBalance = new Money(new BigDecimal("10000.00"), "USD");
         
         BalanceResponseDTO response = new BalanceResponseDTO(
             accountId,
@@ -27,7 +27,7 @@ public class BalanceResponseDTOTest {
     @Test
     void testBalanceResponseFields() {
         Long accountId = 2L;
-        Money cashBalance = new Money(new BigDecimal("25000.50"));
+        Money cashBalance = new Money(new BigDecimal("25000.50"), "USD");
         
         BalanceResponseDTO response = new BalanceResponseDTO(
             accountId,

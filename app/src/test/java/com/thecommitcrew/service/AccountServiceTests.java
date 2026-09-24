@@ -22,8 +22,6 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.validator.AccountStatusValidator;
-import com.thecommitcrew.persistence.entity.AccountEntity;
-import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
@@ -43,56 +41,42 @@ public class AccountServiceTests {
     private OrderMapper orderMapper;
     @Mock
     private AccountStatusValidator statusValidator;
-    @Mock
-    private AccountMapper accountMapper;
 
     private AccountService accountService;
     private Account testAccount;
-    private AccountEntity testAccountEntity;
 
     @BeforeEach
     public void setUp() {
-        accountService = new AccountService(accountRepository, positionMapper, orderMapper, accountMapper);
+        accountService = new AccountService(accountRepository, positionMapper, orderMapper);
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             "John Doe",
-            new Money(new BigDecimal("10000.00")),
+            new Money(new BigDecimal("10000.00"), "USD"),
             AccountStatus.ACTIVE,
-            1,
+            1L,
             LocalDateTime.now(),
             statusValidator
-        );
-
-        testAccountEntity = new AccountEntity(
-            TEST_ACCOUNT_ID.toString(),
-            "John Doe",
-            new BigDecimal("10000.00"),
-            AccountStatus.ACTIVE,
-            1,
-            LocalDateTime.now()
         );
     }
 
     @Test
     void getAccount_WithValidId_ReturnsAccount() {
-        when(accountRepository.findByAccountId(String.valueOf(TEST_ACCOUNT_ID))).thenReturn(Optional.of(testAccountEntity));
-        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
 
         Account result = accountService.getAccount(TEST_ACCOUNT_ID);
 
         assertEquals(testAccount, result);
-        verify(accountRepository).findByAccountId(String.valueOf(TEST_ACCOUNT_ID));
-        verify(accountMapper).toDomain(testAccountEntity);
+        verify(accountRepository).findById(TEST_ACCOUNT_ID);
     }
 
     @Test
     void getAccount_WithInvalidId_ThrowsException() {
-        when(accountRepository.findByAccountId(String.valueOf(INVALID_ACCOUNT_ID))).thenReturn(Optional.empty());
+        when(accountRepository.findById(INVALID_ACCOUNT_ID)).thenReturn(Optional.empty());
 
         assertThrows(AccountNotFoundException.class, () -> 
             accountService.getAccount(INVALID_ACCOUNT_ID)
         );
-        verify(accountRepository).findByAccountId(String.valueOf(INVALID_ACCOUNT_ID));
+        verify(accountRepository).findById(INVALID_ACCOUNT_ID);
     }
 
     @Test
@@ -101,8 +85,7 @@ public class AccountServiceTests {
             createPosition("AAPL", 10L),
             createPosition("GOOGL", 5L)
         );
-        when(accountRepository.findByAccountId(String.valueOf(TEST_ACCOUNT_ID))).thenReturn(Optional.of(testAccountEntity));
-        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
         when(positionMapper.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
 
         List<Position> result = accountService.getPositions(TEST_ACCOUNT_ID);
@@ -113,22 +96,21 @@ public class AccountServiceTests {
 
     @Test
     void getPositions_WithInvalidAccount_ThrowsException() {
-        when(accountRepository.findByAccountId(String.valueOf(INVALID_ACCOUNT_ID))).thenReturn(Optional.empty());
+        when(accountRepository.findById(INVALID_ACCOUNT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () ->
+        assertThrows(AccountNotFoundException.class, () -> 
             accountService.getPositions(INVALID_ACCOUNT_ID)
         );
     }
 
     @Test
     void getBalance_ReturnsAccountBalance() {
-        when(accountRepository.findByAccountId(String.valueOf(TEST_ACCOUNT_ID))).thenReturn(Optional.of(testAccountEntity));
-        when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
 
         Money result = accountService.getBalance(TEST_ACCOUNT_ID);
 
         assertEquals(testAccount.getCashBalance(), result);
-        verify(accountRepository).findByAccountId(String.valueOf(TEST_ACCOUNT_ID));
+        verify(accountRepository).findById(TEST_ACCOUNT_ID);
     }
 
     private Position createPosition(String symbol, Long quantity) {
