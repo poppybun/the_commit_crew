@@ -2,12 +2,9 @@ package com.thecommitcrew.persistence.repository;
 
 import java.util.Optional;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.thecommitcrew.persistence.entity.InstrumentEntity;
 
-import com.thecommitcrew.domain.model.Instrument;
-
-@Repository
-public interface InstrumentRepository {
-    Optional<Instrument> findBySymbol(String symbol);
-    Instrument save(Instrument instrument);
+public interface InstrumentRepository extends JpaRepository<InstrumentEntity, String> {
+    Optional<InstrumentEntity> findBySymbol(String symbol);
 }
