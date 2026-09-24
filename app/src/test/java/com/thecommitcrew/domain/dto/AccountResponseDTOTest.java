@@ -15,7 +15,7 @@ public class AccountResponseDTOTest {
     void testAccountResponseCreation() {
         Long accountId = 1L;
         AccountStatus status = AccountStatus.ACTIVE;
-        Money cashBalance = new Money(new BigDecimal("10000.00"), "USD");
+        Money cashBalance = new Money(new BigDecimal("10000.00"));
         
         AccountResponseDTO response = new AccountResponseDTO(
             accountId,
@@ -30,7 +30,7 @@ public class AccountResponseDTOTest {
     void testAccountResponseFields() {
         Long accountId = 2L;
         AccountStatus status = AccountStatus.SUSPENDED;
-        Money cashBalance = new Money(new BigDecimal("25000.50"), "USD");
+        Money cashBalance = new Money(new BigDecimal("25000.50"));
         
         AccountResponseDTO response = new AccountResponseDTO(
             accountId,
