@@ -19,7 +19,7 @@ set +a
 NETWORK=commit-crew-net
 POSTGRES=commitcrew-dev-db-1
 APP_CONTAINER=the-commit-crew-app
-APP_PORT=8080
+APP_PORT=8081
 
 cleanup() {
   echo "== Teardown =="
