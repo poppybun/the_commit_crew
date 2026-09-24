@@ -1,5 +1,7 @@
 package com.thecommitcrew.domain.model;
 
+import java.util.Currency;
+
 import com.thecommitcrew.domain.enums.AssetClass;
 import com.thecommitcrew.domain.validator.InstrumentSymbolValidator;
 
@@ -14,15 +16,16 @@ public class Instrument {
     private final String symbol;
     private final String name;
     private final AssetClass assetClass;
-    private final String currency = "USD";
+    private final Currency currency;
     private final boolean tradable;
 
 
-    public Instrument(String id, String symbol, String name, AssetClass assetClass,
-        boolean tradable, InstrumentSymbolValidator validator) {
+    public Instrument(String id, String symbol, String name, AssetClass assetClass, 
+        Currency currency, boolean tradable, InstrumentSymbolValidator validator) {
         this.id = validateNotNull(id, "ID cannot be null");
         this.name = validateNotBlank(name, "Name cannot be null");
         this.assetClass = validateNotNull(assetClass, "Asset class cannot be null");
+        this.currency = validateNotNull(currency, "Currency cannot be null");
         this.tradable = tradable;
         validateNotNull(validator, "Validator cannot be null");
         validator.validateSymbol(symbol);
@@ -45,7 +48,7 @@ public class Instrument {
         return assetClass;
     }
 
-    public String getCurrency() {
+    public Currency getCurrency() {
         return currency;
     }
 

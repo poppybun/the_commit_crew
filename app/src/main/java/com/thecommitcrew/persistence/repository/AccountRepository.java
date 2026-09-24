@@ -2,9 +2,12 @@ package com.thecommitcrew.persistence.repository;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.thecommitcrew.persistence.entity.AccountEntity;
+import org.springframework.stereotype.Repository;
 
-public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
-    Optional<AccountEntity> findByAccountId(String accountId);
+import com.thecommitcrew.domain.model.Account;
+
+@Repository
+public interface AccountRepository {
+    Optional<Account> findById(Long accountId);
+    Account save(Account account);
 }

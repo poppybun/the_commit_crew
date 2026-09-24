@@ -12,5 +12,4 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 COPY --from=build /app/target/the-commit-crew-0.1.0.jar app.jar
 
-EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

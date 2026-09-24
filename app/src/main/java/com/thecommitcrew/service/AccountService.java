@@ -8,7 +8,6 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.exception.AccountNotFoundException;
-import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 
@@ -16,20 +15,17 @@ import com.thecommitcrew.persistence.mapper.OrderMapper;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final AccountMapper accountMapper;
     private final PositionMapper positionMapper;
     private final OrderMapper orderMapper;
 
-    public AccountService(AccountRepository accountRepository, PositionMapper positionMapper, OrderMapper orderMapper, AccountMapper accountMapper) {
+    public AccountService(AccountRepository accountRepository, PositionMapper positionMapper, OrderMapper orderMapper) {
         this.accountRepository = accountRepository;
         this.positionMapper = positionMapper;
         this.orderMapper = orderMapper;
-        this.accountMapper = accountMapper;
     }
 
     public Account getAccount(Long accountId) {
-        return accountRepository.findByAccountId(String.valueOf(accountId))
-            .map(accountMapper::toDomain)
+        return accountRepository.findById(accountId)
             .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountId));
     }
 
