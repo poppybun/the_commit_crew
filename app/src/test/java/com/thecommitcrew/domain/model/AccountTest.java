@@ -18,8 +18,6 @@ public class AccountTest {
     
     private static final Long TEST_ACCOUNT_ID = 1L;
     private static final String TEST_HOLDER_NAME = "John Doe";
-    private static final String TEST_CURRENCY = "USD";
-    private static final String TEST_CURRENCY_EUR = "EUR";  
     private static final Long TEST_VERSION = 1L;
 
     private static final BigDecimal INITIAL_BALANCE = new BigDecimal("10000.00");
@@ -30,11 +28,11 @@ public class AccountTest {
     private static final BigDecimal MEDIUM_AMOUNT = new BigDecimal("500.00");
 
     private Money createMoney(BigDecimal amount) {
-        return new Money(amount, TEST_CURRENCY);
+        return new Money(amount);
     }
 
     private Money createEuroMoney(BigDecimal amount) {
-        return new Money(amount, TEST_CURRENCY_EUR);
+        return new Money(amount);
     }
 
     @BeforeEach
@@ -98,7 +96,7 @@ public class AccountTest {
         Account closedAccount = account.updateStatus(AccountStatus.CLOSED);
         assertFalse(closedAccount.isActive());
     }
- 
+
     @Test
     public void testVersionIncrement_IncrementsOnEveryOperation() {
         assertEquals(1L, account.getVersion());

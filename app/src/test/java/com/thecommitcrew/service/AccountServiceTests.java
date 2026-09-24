@@ -51,7 +51,7 @@ public class AccountServiceTests {
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             "John Doe",
-            new Money(new BigDecimal("10000.00"), "USD"),
+            new Money(new BigDecimal("10000.00")),
             AccountStatus.ACTIVE,
             1L,
             LocalDateTime.now(),
@@ -98,7 +98,7 @@ public class AccountServiceTests {
     void getPositions_WithInvalidAccount_ThrowsException() {
         when(accountRepository.findById(INVALID_ACCOUNT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(AccountNotFoundException.class, () -> 
+        assertThrows(AccountNotFoundException.class, () ->
             accountService.getPositions(INVALID_ACCOUNT_ID)
         );
     }

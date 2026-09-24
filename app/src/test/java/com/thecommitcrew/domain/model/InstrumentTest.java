@@ -21,8 +21,7 @@ public class InstrumentTest {
     
     @BeforeEach
     public void setUp() {
-        instrument = new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY, 
-            Currency.getInstance("USD"), true, VALIDATOR);
+        instrument = new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
     }
     
     @Test
@@ -44,8 +43,7 @@ public class InstrumentTest {
         @DisplayName("Testing null id")
         public void testConstructor_NullId() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument(null, "AAPL", "Apple Inc.", AssetClass.EQUITY,
-                    Currency.getInstance("USD"), true, VALIDATOR);
+                new Instrument(null, "AAPL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
             });
         }
         
@@ -53,8 +51,7 @@ public class InstrumentTest {
         @DisplayName("Testing null name")
         public void testConstructor_NullName() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", null, AssetClass.EQUITY,
-                    Currency.getInstance("USD"), true, VALIDATOR);
+                new Instrument("1", "AAPL", null, AssetClass.EQUITY, true, VALIDATOR);
             });
         }
         
@@ -62,17 +59,7 @@ public class InstrumentTest {
         @DisplayName("Testing null asset class")
         public void testConstructor_NullAssetClass() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", "Apple Inc.", null,
-                    Currency.getInstance("USD"), true, VALIDATOR);
-            });
-        }
-        
-        @Test
-        @DisplayName("Testing null currency")
-        public void testConstructor_NullCurrency() {
-            assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY,
-                    null, true, VALIDATOR);
+                new Instrument("1", "AAPL", "Apple Inc.", null, true, VALIDATOR);
             });
         }
         
@@ -80,8 +67,7 @@ public class InstrumentTest {
         @DisplayName("Testing null validator")
         public void testConstructor_NullValidator() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY,
-                    Currency.getInstance("USD"), true, null);
+                new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY, true, null);
             });
         }
 
@@ -89,8 +75,7 @@ public class InstrumentTest {
         @DisplayName("Testing invalid symbol")
         public void testConstructor_InvalidSymbol() {
             assertThrows(InstrumentNotFoundException.class, () -> {
-                new Instrument("1", "INVALID_SYMBOL", "Apple Inc.", AssetClass.EQUITY,
-                    Currency.getInstance("USD"), true, VALIDATOR);
+                new Instrument("1", "INVALID_SYMBOL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
             });
         }
     }
@@ -131,8 +116,7 @@ public class InstrumentTest {
         
         @Test
         public void testIsTradableFalse() {
-            Instrument nonTradable = new Instrument("2", "AAPL", "Apple Inc.", AssetClass.EQUITY, 
-                Currency.getInstance("USD"), false, VALIDATOR);
+            Instrument nonTradable = new Instrument("2", "AAPL", "Apple Inc.", AssetClass.EQUITY, false, VALIDATOR);
             assertFalse(nonTradable.isTradable());
         }
     }

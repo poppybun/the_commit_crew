@@ -31,7 +31,7 @@ class OrderLogicTest {
 		activeAccount = new Account(
 			123L,
 			"John Doe",
-			new Money(new BigDecimal("10000.00"), "USD"),
+			new Money(new BigDecimal("10000.00")),
 			AccountStatus.ACTIVE,
 			1L,
 			LAST_UPDATED,
