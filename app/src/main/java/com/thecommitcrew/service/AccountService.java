@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import java.util.*;
 import com.thecommitcrew.persistence.repository.AccountRepository;
@@ -8,20 +8,20 @@ import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.model.Money;
 import com.thecommitcrew.domain.exception.AccountNotFoundException;
-import com.thecommitcrew.persistence.repository.PositionRepository;
-import com.thecommitcrew.persistence.repository.OrderRepository;
+import com.thecommitcrew.persistence.mapper.PositionMapper;
+import com.thecommitcrew.persistence.mapper.OrderMapper;
 
 @Service 
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final PositionRepository positionRepository;
-    private final OrderRepository orderRepository;
+    private final PositionMapper positionMapper;
+    private final OrderMapper orderMapper;
 
-    public AccountService(AccountRepository accountRepository, PositionRepository positionRepository, OrderRepository orderRepository) {
+    public AccountService(AccountRepository accountRepository, PositionMapper positionMapper, OrderMapper orderMapper) {
         this.accountRepository = accountRepository;
-        this.positionRepository = positionRepository;
-        this.orderRepository = orderRepository;
+        this.positionMapper = positionMapper;
+        this.orderMapper = orderMapper;
     }
 
     public Account getAccount(Long accountId) {
@@ -31,12 +31,12 @@ public class AccountService {
 
     public List<Position> getPositions(Long accountId) {
         getAccount(accountId); // Validate account exists
-        return positionRepository.findByAccountId(accountId);
+        return positionMapper.findByAccountId(accountId);
     }
 
     public List<Order> getOrders(Long accountId) {
         getAccount(accountId); // Validate account exists
-        return orderRepository.findByAccountId(accountId);
+        return orderMapper.findByAccountId(accountId);
     }
 
     public Money getBalance(Long accountId) {

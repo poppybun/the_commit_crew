@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

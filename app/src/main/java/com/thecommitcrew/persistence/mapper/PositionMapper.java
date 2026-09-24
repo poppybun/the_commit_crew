@@ -1,14 +1,14 @@
-package com.thecommitcrew.persistence.repository;
+package com.thecommitcrew.persistence.mapper;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
 
 import com.thecommitcrew.domain.model.Position;
 
-@Repository
-public interface PositionRepository {
+@Mapper 
+public interface PositionMapper {
     Optional<Position> findByAccountIdAndSymbol(Long accountId, String symbol);
     List<Position> findByAccountId(Long accountId);
     Position save(Position position);

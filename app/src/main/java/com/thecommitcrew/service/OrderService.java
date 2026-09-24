@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import com.thecommitcrew.domain.dto.PlaceOrderRequestDTO;
 import com.thecommitcrew.domain.enums.OrderSide;
@@ -17,8 +17,8 @@ import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.repository.InstrumentRepository;
-import com.thecommitcrew.persistence.repository.OrderRepository;
-import com.thecommitcrew.persistence.repository.PositionRepository;
+import com.thecommitcrew.persistence.mapper.OrderMapper;
+import com.thecommitcrew.persistence.mapper.PositionMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
     private static final long ZERO_QUANTITY = 0L;
 
-    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
     private final AccountRepository accountRepository;
-    private final PositionRepository positionRepository;
+    private final PositionMapper positionMapper;
     private final InstrumentRepository instrumentRepository;
     private final PositionService positionService;
 
-    public OrderService(OrderRepository orderRepository, AccountRepository accountRepository,
-                        PositionRepository positionRepository, InstrumentRepository instrumentRepository) {
-        this.orderRepository = orderRepository;
+    public OrderService(OrderMapper orderMapper, AccountRepository accountRepository,
+                        PositionMapper positionMapper, InstrumentRepository instrumentRepository) {
+        this.orderMapper = orderMapper;
         this.accountRepository = accountRepository;
-        this.positionRepository = positionRepository;
+        this.positionMapper = positionMapper;
         this.instrumentRepository = instrumentRepository;
         this.positionService = new PositionService();
     }
@@ -74,7 +74,7 @@ public class OrderService {
         );
         order.setStatus(status);
 
-        Order savedOrder = orderRepository.save(order);
+        Order savedOrder = orderMapper.save(order);
         if (savedOrder.getStatus() == OrderStatus.NEW) {
             executeLoadedOrder(savedOrder);
         }
@@ -90,7 +90,7 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
+        orderMapper.save(order);
     }
 
     public void validateOrder(PlaceOrderRequestDTO request) {
@@ -126,7 +126,7 @@ public class OrderService {
             throw new IllegalStateException("Instrument is not tradable: " + order.getSymbol());
         }
 
-        boolean duplicateOrder = orderRepository.findByAccountId(order.getAccountId()).stream()
+        boolean duplicateOrder = orderMapper.findByAccountId(order.getAccountId()).stream()
             .anyMatch(existingOrder -> existingOrder.getIdempotencyKey().equals(order.getIdempotencyKey()));
         if (duplicateOrder) {
             throw new DuplicateOrderException(
@@ -145,7 +145,7 @@ public class OrderService {
             throw new AccountNotActiveException("Account is not active: " + order.getAccountId());
         }
 
-        Optional<Position> existingPosition = positionRepository.findByAccountIdAndSymbol(
+        Optional<Position> existingPosition = positionMapper.findByAccountIdAndSymbol(
             order.getAccountId(),
             order.getSymbol()
         );
@@ -177,10 +177,10 @@ public class OrderService {
             BigDecimal.ZERO
         ));
         Position updatedPosition = positionService.applyOrder(basePosition, order);
-        positionRepository.save(updatedPosition);
+        positionMapper.save(updatedPosition);
 
         order.setStatus(OrderStatus.FILLED);
-        orderRepository.save(order);
+        orderMapper.save(order);
     }
 
     private OrderStatus determineStatus(Account account, OrderSide side, long quantity, BigDecimal price,
@@ -204,12 +204,12 @@ public class OrderService {
     }
 
     private Order getOrder(UUID orderId) {
-        return orderRepository.findById(orderId)
+        return orderMapper.findById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
     }
 
     private long getAvailableHoldings(Long accountId, String symbol) {
-        return positionRepository.findByAccountIdAndSymbol(accountId, symbol)
+        return positionMapper.findByAccountIdAndSymbol(accountId, symbol)
             .map(Position::getQuantity)
             .orElse(ZERO_QUANTITY);
     }

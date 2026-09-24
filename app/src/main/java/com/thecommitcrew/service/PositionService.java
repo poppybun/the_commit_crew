@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

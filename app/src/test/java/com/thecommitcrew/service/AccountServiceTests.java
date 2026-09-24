@@ -1,4 +1,4 @@
-package com.thecommitcrew.domain.service;
+package com.thecommitcrew.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,12 +20,12 @@ import com.thecommitcrew.domain.enums.AccountStatus;
 import com.thecommitcrew.domain.exception.AccountNotFoundException;
 import com.thecommitcrew.domain.model.Account;
 import com.thecommitcrew.domain.model.Money;
-import com.thecommitcrew.domain.model.Order;
 import com.thecommitcrew.domain.model.Position;
 import com.thecommitcrew.domain.validator.AccountStatusValidator;
 import com.thecommitcrew.persistence.repository.AccountRepository;
-import com.thecommitcrew.persistence.repository.OrderRepository;
-import com.thecommitcrew.persistence.repository.PositionRepository;
+import com.thecommitcrew.persistence.mapper.PositionMapper;
+import com.thecommitcrew.persistence.mapper.OrderMapper;
+
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
@@ -37,9 +37,9 @@ public class AccountServiceTests {
     @Mock
     private AccountRepository accountRepository;
     @Mock
-    private PositionRepository positionRepository;
+    private PositionMapper positionMapper;
     @Mock
-    private OrderRepository orderRepository;
+    private OrderMapper orderMapper;
     @Mock
     private AccountStatusValidator statusValidator;
 
@@ -48,7 +48,7 @@ public class AccountServiceTests {
 
     @BeforeEach
     public void setUp() {
-        accountService = new AccountService(accountRepository, positionRepository, orderRepository);
+        accountService = new AccountService(accountRepository, positionMapper, orderMapper);
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             "John Doe",
@@ -87,12 +87,12 @@ public class AccountServiceTests {
             createPosition("GOOGL", 5L)
         );
         when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(testAccount));
-        when(positionRepository.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
+        when(positionMapper.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
 
         List<Position> result = accountService.getPositions(TEST_ACCOUNT_ID);
 
         assertThat(result).hasSize(2);
-        verify(positionRepository).findByAccountId(TEST_ACCOUNT_ID);
+        verify(positionMapper).findByAccountId(TEST_ACCOUNT_ID);
     }
 
     @Test
