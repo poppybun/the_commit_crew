@@ -39,20 +39,19 @@ public class AccountControllerTest {
 
     private static final Long TEST_ACCOUNT_ID = 1L;
     private static final String TEST_ACCOUNT_HOLDER = "John Doe";
-    private static final String TEST_CURRENCY = "USD";
 
     private Account testAccount;
     private Money testBalance;
 
     @BeforeEach
     void setUp() {
-        testBalance = new Money(new BigDecimal("10000.00"), TEST_CURRENCY);
+        testBalance = new Money(new BigDecimal("10000.00"));
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             TEST_ACCOUNT_HOLDER,
             testBalance,
             AccountStatus.ACTIVE,
-            1L,
+            1,
             LocalDateTime.now(),
             new com.thecommitcrew.domain.validator.DefaultAccountStatusValidator()
         );
