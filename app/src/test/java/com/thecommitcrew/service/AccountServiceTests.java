@@ -26,7 +26,6 @@ import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 
-
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
 
