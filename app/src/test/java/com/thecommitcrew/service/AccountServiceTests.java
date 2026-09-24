@@ -25,8 +25,8 @@ import com.thecommitcrew.domain.validator.AccountStatusValidator;
 import com.thecommitcrew.persistence.entity.AccountEntity;
 import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.repository.AccountRepository;
-import com.thecommitcrew.persistence.repository.OrderRepository;
-import com.thecommitcrew.persistence.repository.PositionRepository;
+import com.thecommitcrew.persistence.mapper.PositionMapper;
+import com.thecommitcrew.persistence.mapper.OrderMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
@@ -38,9 +38,9 @@ public class AccountServiceTests {
     @Mock
     private AccountRepository accountRepository;
     @Mock
-    private PositionRepository positionRepository;
+    private PositionMapper positionMapper;
     @Mock
-    private OrderRepository orderRepository;
+    private OrderMapper orderMapper;
     @Mock
     private AccountStatusValidator statusValidator;
     @Mock
@@ -52,7 +52,7 @@ public class AccountServiceTests {
 
     @BeforeEach
     public void setUp() {
-        accountService = new AccountService(accountRepository, positionRepository, orderRepository, accountMapper);
+        accountService = new AccountService(accountRepository, positionMapper, orderMapper, accountMapper);
         testAccount = new Account(
             TEST_ACCOUNT_ID,
             "John Doe",
@@ -103,12 +103,12 @@ public class AccountServiceTests {
         );
         when(accountRepository.findByAccountId(String.valueOf(TEST_ACCOUNT_ID))).thenReturn(Optional.of(testAccountEntity));
         when(accountMapper.toDomain(testAccountEntity)).thenReturn(testAccount);
-        when(positionRepository.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
+        when(positionMapper.findByAccountId(TEST_ACCOUNT_ID)).thenReturn(positions);
 
         List<Position> result = accountService.getPositions(TEST_ACCOUNT_ID);
 
         assertThat(result).hasSize(2);
-        verify(positionRepository).findByAccountId(TEST_ACCOUNT_ID);
+        verify(positionMapper).findByAccountId(TEST_ACCOUNT_ID);
     }
 
     @Test

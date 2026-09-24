@@ -1,16 +1,16 @@
-package com.thecommitcrew.persistence.repository;
+package com.thecommitcrew.persistence.mapper;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
 
 import com.thecommitcrew.domain.enums.OrderStatus;
 import com.thecommitcrew.domain.model.Order;
 
-@Repository
-public interface OrderRepository {
+@Mapper
+public interface OrderMapper {
     Optional<Order> findById(UUID orderId);
     Order save(Order order);
     List<Order> findByAccountId(Long accountId);

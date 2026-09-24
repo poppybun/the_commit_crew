@@ -11,7 +11,7 @@ import com.thecommitcrew.persistence.repository.AccountRepository;
 import com.thecommitcrew.persistence.repository.OrderRepository;
 import com.thecommitcrew.persistence.repository.PositionRepository;
 
-@SpringBootTest
+@SpringBootTest()
 class MainTests {
 
   @MockitoBean
