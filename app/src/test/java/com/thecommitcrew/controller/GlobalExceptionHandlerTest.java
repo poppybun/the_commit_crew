@@ -149,4 +149,13 @@ class GlobalExceptionHandlerTest {
             assert response.message() != null;
         }
     }
+
+    @Test
+    @DisplayName("Handles IllegalStateException with 400 status")
+    void handlesIllegalState() throws Exception {
+        mockMvc.perform(get("/test-illegal-state"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errorCode", is("INVALID_STATE")))
+            .andExpect(jsonPath("$.message", is("Only NEW orders can be cancelled")));
+    }
 }

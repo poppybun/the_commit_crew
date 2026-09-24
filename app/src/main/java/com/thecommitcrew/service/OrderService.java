@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
+@SuppressWarnings("null")
 public class OrderService {
     private static final long ZERO_QUANTITY = 0L;
 
@@ -37,20 +38,21 @@ public class OrderService {
     private final AccountRepository accountRepository;
     private final PositionMapper positionMapper;
     private final InstrumentRepository instrumentRepository;
-    private final InstrumentMapper instrumentMapper;
     private final AccountMapper accountMapper;
+    private final InstrumentMapper instrumentMapper;
     private final PositionService positionService;
 
     public OrderService(OrderMapper orderMapper, AccountRepository accountRepository,
-                    PositionMapper positionMapper, InstrumentRepository instrumentRepository,
-                    InstrumentMapper instrumentMapper, AccountMapper accountMapper) {
+                        PositionMapper positionMapper, InstrumentRepository instrumentRepository,
+                        AccountMapper accountMapper, InstrumentMapper instrumentMapper,
+                        PositionService positionService) {
         this.orderMapper = orderMapper;
         this.accountRepository = accountRepository;
         this.positionMapper = positionMapper;
         this.instrumentRepository = instrumentRepository;
-        this.instrumentMapper = instrumentMapper;
         this.accountMapper = accountMapper;
-        this.positionService = new PositionService();
+        this.instrumentMapper = instrumentMapper;
+        this.positionService = positionService;
     }
 
     @Transactional
@@ -207,7 +209,7 @@ public class OrderService {
     }
 
     private Account getAccount(Long accountId) {
-        return accountRepository.findById(accountId)
+        return accountRepository.findByAccountId(String.valueOf(accountId))
             .map(accountMapper::toDomain)
             .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountId));
     }
