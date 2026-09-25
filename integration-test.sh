@@ -21,7 +21,7 @@ APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
 
 # Accept postgres container name from parameter
-POSTGRES_CONTAINER="${4:-the_commit_crew_db_1}"
+POSTGRES_CONTAINER="${4:-the_commit_crew-db-1}"
 
 echo "Using postgres container: $POSTGRES_CONTAINER"
 
