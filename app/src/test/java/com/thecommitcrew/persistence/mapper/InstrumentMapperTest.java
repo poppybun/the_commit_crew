@@ -1,20 +1,31 @@
 package com.thecommitcrew.persistence.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.thecommitcrew.domain.enums.AssetClass;
 import com.thecommitcrew.domain.model.Instrument;
 import com.thecommitcrew.domain.validator.BasicInstrumentSymbolValidator;
 import com.thecommitcrew.domain.validator.InstrumentSymbolValidator;
 import com.thecommitcrew.persistence.entity.InstrumentEntity;
+import com.thecommitcrew.persistence.repository.InstrumentRepository;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("InstrumentMapper Tests")
 public class InstrumentMapperTest {
+
+    @Mock
+    private InstrumentRepository instrumentRepository;
 
     private InstrumentMapper mapper;
     private InstrumentSymbolValidator symbolValidator;
@@ -26,7 +37,7 @@ public class InstrumentMapperTest {
 
     @BeforeEach
     void setUp() {
-        symbolValidator = new BasicInstrumentSymbolValidator();
+        symbolValidator = new BasicInstrumentSymbolValidator(instrumentRepository);
         mapper = new InstrumentMapper(symbolValidator);
     }
 
@@ -37,6 +48,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Converts InstrumentEntity to Instrument successfully")
         void convertEntityToDomainSuccessfully() {
+            // Mock valid symbol
+        when(instrumentRepository.findBySymbol("AAPL"))
+            .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+            
             InstrumentEntity entity = new InstrumentEntity(
                 TEST_SYMBOL,
                 TEST_NAME,
@@ -64,6 +79,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps symbol correctly")
         void mapsSymbolCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("GOOGL"))    
+                .thenReturn(Optional.of(new InstrumentEntity("GOOGL", "Alphabet Inc.", null, "USD", true)));
+
             String symbol = "GOOGL";
             InstrumentEntity entity = new InstrumentEntity(
                 symbol,
@@ -81,6 +100,11 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps name correctly")
         void mapsNameCorrectly() {
+            // Mock valid symbol
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             String name = "Microsoft Corporation";
             InstrumentEntity entity = new InstrumentEntity(
                 TEST_SYMBOL,
@@ -98,6 +122,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps different asset classes correctly")
         void mapsAssetClassesCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             for (AssetClass assetClass : AssetClass.values()) {
                 InstrumentEntity entity = new InstrumentEntity(
                     TEST_SYMBOL,
@@ -116,6 +144,11 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps tradable flag correctly")
         void mapsTradableFlagCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
+
             InstrumentEntity entity = new InstrumentEntity(
                 TEST_SYMBOL,
                 TEST_NAME,
@@ -132,6 +165,11 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Verifies currency is set to USD in domain model")
         void verifiesCurrencyIsUSD() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
+
             InstrumentEntity entity = new InstrumentEntity(
                 TEST_SYMBOL,
                 TEST_NAME,
@@ -153,6 +191,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Converts Instrument to InstrumentEntity successfully")
         void convertDomainToEntitySuccessfully() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             Instrument domain = new Instrument(
                 TEST_SYMBOL,
                 TEST_SYMBOL,
@@ -181,6 +223,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps symbol from domain correctly")
         void mapsSymbolFromDomainCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("MSFT"))
+                .thenReturn(Optional.of(new InstrumentEntity("MSFT", "Microsoft Corporation", null, "USD", true)));
+            
             String symbol = "MSFT";
             Instrument domain = new Instrument(
                 symbol,
@@ -199,6 +245,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps name from domain correctly")
         void mapsNameFromDomainCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             String name = "Tesla Inc.";
             Instrument domain = new Instrument(
                 TEST_SYMBOL,
@@ -217,6 +267,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps tradable status from domain correctly")
         void mapsTradableStatusFromDomainCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             Instrument domain = new Instrument(
                 TEST_SYMBOL,
                 TEST_SYMBOL,
@@ -234,6 +288,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Maps currency from domain correctly")
         void mapsCurrencyFromDomainCorrectly() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             Instrument domain = new Instrument(
                 TEST_SYMBOL,
                 TEST_SYMBOL,
@@ -256,6 +314,10 @@ public class InstrumentMapperTest {
         @Test
         @DisplayName("Entity to Domain to Entity preserves data")
         void entityToDomainToEntityPreservesData() {
+            // Mock valid symbol
+            when(instrumentRepository.findBySymbol("AAPL"))
+                .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
             InstrumentEntity original = new InstrumentEntity(
                 TEST_SYMBOL,
                 TEST_NAME,

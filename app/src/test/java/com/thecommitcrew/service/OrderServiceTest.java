@@ -101,6 +101,10 @@ class OrderServiceTest {
             1,
             LocalDateTime.now()
         );
+
+        // Mock valid symbol
+        when(instrumentRepository.findBySymbol(SYMBOL))
+            .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
         
         tradableInstrument = new Instrument(
             "instr-1",
@@ -108,7 +112,7 @@ class OrderServiceTest {
             "Apple Inc.",
             AssetClass.EQUITY,
             true,
-            new BasicInstrumentSymbolValidator()
+            new BasicInstrumentSymbolValidator(instrumentRepository)
         );
         
         tradableInstrumentEntity = new InstrumentEntity(
