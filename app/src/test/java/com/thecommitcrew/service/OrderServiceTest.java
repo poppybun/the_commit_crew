@@ -34,10 +34,6 @@ import com.thecommitcrew.persistence.mapper.AccountMapper;
 import com.thecommitcrew.persistence.mapper.InstrumentMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
-import com.thecommitcrew.persistence.mapper.AccountMapper;
-import com.thecommitcrew.persistence.mapper.InstrumentMapper;
-import com.thecommitcrew.persistence.entity.AccountEntity;
-import com.thecommitcrew.persistence.entity.InstrumentEntity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
@@ -136,7 +133,7 @@ class OrderServiceTest {
         when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of());
-        when(orderMapper.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(orderMapper).save(any(Order.class));
         Position newPosition = new Position(ACCOUNT_ID, SYMBOL, 10L, new BigDecimal("100.00"));
         when(positionService.applyOrder(any(Position.class), any(Order.class))).thenReturn(newPosition);
 
@@ -160,7 +157,7 @@ class OrderServiceTest {
         when(instrumentRepository.findBySymbol(SYMBOL)).thenReturn(Optional.of(tradableInstrumentEntity));
         when(positionMapper.findByAccountIdAndSymbol(ACCOUNT_ID, SYMBOL)).thenReturn(Optional.empty());
         when(orderMapper.findByAccountId(ACCOUNT_ID)).thenReturn(List.of());
-        when(orderMapper.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+       doNothing().when(orderMapper).save(any(Order.class));
 
         Order order = orderService.placeOrder(request);
 
