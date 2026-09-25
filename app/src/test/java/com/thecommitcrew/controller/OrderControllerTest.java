@@ -6,6 +6,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.thecommitcrew.auth.JwtTokenProvider;
 import com.thecommitcrew.domain.dto.PlaceOrderRequestDTO;
 import com.thecommitcrew.domain.enums.OrderSide;
 import com.thecommitcrew.domain.enums.OrderStatus;
@@ -41,6 +48,7 @@ import java.util.UUID;
  * Tests verify proper delegation to OrderService and exception handling.
  */
 @WebMvcTest(OrderController.class)
+@Import(OrderControllerTest.TestSecurityConfig.class)
 @DisplayName("OrderController Tests")
 @SuppressWarnings("null")
 class OrderControllerTest {
@@ -61,6 +69,9 @@ class OrderControllerTest {
     
     @MockBean
     private OrderService orderService;
+
+    @MockBean 
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
     void setUp() {
@@ -235,8 +246,6 @@ class OrderControllerTest {
             .andExpect(status().is4xxClientError());
     }
     
-
-    
     /**
      * Test successfully cancelling an order.
      * OrderService.cancelOrder completes without exception.
@@ -299,5 +308,22 @@ class OrderControllerTest {
         // Act & Assert
         mockMvc.perform(delete("/api/v1/orders/" + orderId))
             .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test-only security configuration that disables authentication for all requests.
+     */
+    @TestConfiguration
+    @EnableWebSecurity
+    public static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll()
+                );
+            return http.build();
+        }
     }
 }
