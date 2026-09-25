@@ -11,10 +11,9 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-# Load environment variables
-set -a
-source "$ENV_FILE"
-set +a
+# Load environment variables directly from file (avoid bash interpretation of special chars)
+POSTGRES_DB=$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '\r')
+POSTGRES_PASSWORD=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '\r')
 
 NETWORK=the-commit-crew_default
 APP_CONTAINER=the-commit-crew-app
