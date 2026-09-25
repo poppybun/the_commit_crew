@@ -25,23 +25,22 @@ POSTGRES_CONTAINER="${4:-the_commit_crew-db-1}"
 
 echo "Using postgres container: $POSTGRES_CONTAINER"
 
-# Ensure postgres container is on the network
-if docker ps --filter "name=${POSTGRES_CONTAINER}" --quiet >/dev/null 2>&1; then
-  docker network connect "$NETWORK" "$POSTGRES_CONTAINER" 2>/dev/null || true
-  
-  # Wait for postgres to be ready
-  echo "== Waiting for Postgres to be ready =="
-  for i in $(seq 1 30); do
-    if docker exec "$POSTGRES_CONTAINER" pg_isready -U postgres >/dev/null 2>&1; then
-      echo "Postgres is ready"
-      break
-    fi
-    if [ $i -lt 30 ]; then
-      echo "Waiting for postgres... (attempt $i/30)"
-      sleep 1
-    fi
-  done
-fi
+# Get the network postgres is on
+POSTGRES_NETWORK=$(docker inspect "$POSTGRES_CONTAINER" --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
+echo "Postgres is on network: $POSTGRES_NETWORK"
+
+# Wait for postgres to be ready
+echo "== Waiting for Postgres to be ready =="
+for i in $(seq 1 30); do
+  if docker exec "$POSTGRES_CONTAINER" pg_isready -U postgres >/dev/null 2>&1; then
+    echo "Postgres is ready"
+    break
+  fi
+  if [ $i -lt 30 ]; then
+    echo "Waiting for postgres... (attempt $i/30)"
+    sleep 1
+  fi
+done
 
 cleanup() {
   echo "== Teardown =="
@@ -50,7 +49,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "== Stage: Run Container =="
-docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:$APP_PORT" \
+docker run -d --name "$APP_CONTAINER" --network "$POSTGRES_NETWORK" -p "$APP_PORT:$APP_PORT" \
   -e SPRING_DATASOURCE_URL="jdbc:postgresql://${POSTGRES_CONTAINER}:5432/${POSTGRES_DB}" \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD="${POSTGRES_PASSWORD}" \
