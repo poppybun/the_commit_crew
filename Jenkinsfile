@@ -200,7 +200,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'env-dev-file', variable: 'ENV_FILE_PATH')]) {
                     sh '''
                         chmod +x integration-test.sh
-                        ./integration-test.sh the-commit-crew:${BUILD_NUMBER} dev "${ENV_FILE_PATH}"
+                        ./integration-test.sh the-commit-crew:${BUILD_NUMBER} dev "${ENV_FILE_PATH}" the_commit_crew-db-1
                     '''
                 }
             }

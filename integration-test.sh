@@ -17,18 +17,10 @@ source "$ENV_FILE"
 set +a
 
 NETWORK=the-commit-crew_default  # Use the same network as Start Database stage
-POSTGRES_CONTAINER=commitcrew-dev-db-1  # Correct container name from docker-compose
+# Allow container name to be overridden via environment variable
+POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commitcrew-dev-db-1}"
 APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
-
-# Detect which postgres container exists and is running
-if docker ps --filter "name=commitcrew-dev-db-1" --quiet >/dev/null 2>&1; then
-  POSTGRES_CONTAINER=commitcrew-dev-db-1
-elif docker ps --filter "name=the_commit_crew-db-1" --quiet >/dev/null 2>&1; then
-  POSTGRES_CONTAINER=the_commit_crew-db-1
-else
-  POSTGRES_CONTAINER=commitcrew-dev-db-1  # Default to local
-fi
 
 echo "Using postgres container: $POSTGRES_CONTAINER"
 
