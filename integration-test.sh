@@ -37,7 +37,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "== Stage: Run Container =="
-docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:$APP_PORT" \
+docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:8080" \
   -e SPRING_DATASOURCE_URL="jdbc:postgresql://${POSTGRES_CONTAINER}:5432/${POSTGRES_DB}" \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD="${POSTGRES_PASSWORD}" \
