@@ -20,10 +20,15 @@ NETWORK=the-commit-crew_default
 APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
 
-# Accept postgres container name from parameter, default to Jenkins container name
+# Accept postgres container name from parameter
 POSTGRES_CONTAINER="${4:-the_commit_crew-db-1}"
 
 echo "Using postgres container: $POSTGRES_CONTAINER"
+
+# Ensure postgres container is on the network
+if docker ps --filter "name=${POSTGRES_CONTAINER}" --quiet >/dev/null 2>&1; then
+  docker network connect "$NETWORK" "$POSTGRES_CONTAINER" 2>/dev/null || true
+fi
 
 cleanup() {
   echo "== Teardown =="
