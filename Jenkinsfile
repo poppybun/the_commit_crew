@@ -184,7 +184,7 @@ pipeline {
             }
         }
         stage('Test') {
-            steps { sh 'mvn -B test -f app/pom.xml' }
+            steps { sh 'mvn -B test' }
                 post { always { junit 'app/target/surefire-reports/*.xml' } }
         }
         stage('Integration Tests') {
