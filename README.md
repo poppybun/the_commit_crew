@@ -60,26 +60,6 @@ prod:
 docker-compose -p commitcrew-prod --env-file .env.prod exec db psql -U postgres -d the-commit-crew-prod -c "\dt"
 ```
 You should see the list of tables for each database.
-
-## Running integration script locally
-1. Run the databse:
-```bash
-docker-compose -p commitcrew-dev --env-file .env.dev up -d db
-```
-
-2. Build the image:
-```bash
-docker build -t the-commit-crew:latest .
-```
-
-3. Activate the script (only needs to be done once):
-```bash
-chmod +x integration-test.sh
-```
-
-4. Run the script:
-```bash
-./integration-test.sh
 ```
 
 ## Coding Conventions
