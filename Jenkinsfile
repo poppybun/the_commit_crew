@@ -155,7 +155,11 @@ pipeline {
         stage('Smoke Test') {
             steps {
                 sh '''
-                    CONTAINER_ID=$(docker run -d -p 8081:8081 the-commit-crew:${BUILD_NUMBER})
+                    CONTAINER_ID=$(docker run -d \
+                        -p 8081:8081 \
+                        -e JWT_SECRET="test-secret-for-smoke-test" \
+                        --network=the-commit-crew_default \
+                        the-commit-crew:${BUILD_NUMBER})
                     
                     echo "Waiting for Spring Boot to start..."
                     for i in {1..30}; do
