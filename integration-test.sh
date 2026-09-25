@@ -4,7 +4,7 @@ set -euo pipefail
 # Accept image name from Jenkins (e.g., the-commit-crew:42)
 APP_IMAGE="${1:-the-commit-crew:latest}"
 ENV=${2:-dev}
-ENV_FILE="${3:-.env.${ENV}}"  # Use parameter if provided, otherwise look locally
+ENV_FILE="${3:-.env.${ENV}}"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "ERROR: $ENV_FILE not found"
@@ -16,10 +16,21 @@ set -a
 source "$ENV_FILE"
 set +a
 
-NETWORK=commit-crew-net
-POSTGRES=commitcrew-dev-db-1
+NETWORK=the-commit-crew_default  # Use the same network as Start Database stage
+POSTGRES_CONTAINER=commitcrew-dev-db-1  # Correct container name from docker-compose
 APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
+
+# Try to use Jenkins network, fallback to creating one locally
+if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
+  echo "== Creating network (running locally) =="
+  docker network create "$NETWORK" >/dev/null 2>&1 || true
+fi
+
+# If postgres container exists, try to connect it to the network
+if docker ps -a --filter "name=^${POSTGRES_CONTAINER}$" --quiet >/dev/null 2>&1; then
+  docker network connect "$NETWORK" "$POSTGRES_CONTAINER" >/dev/null 2>&1 || true
+fi
 
 cleanup() {
   echo "== Teardown =="
@@ -27,15 +38,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "== Stage: Network =="
-docker network create "$NETWORK" >/dev/null 2>&1 || true
-docker network connect "$NETWORK" "$POSTGRES" >/dev/null 2>&1 || true
-
-echo "== Stage: Using pre-built image: $APP_IMAGE =="
-
 echo "== Stage: Run Container =="
 docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:$APP_PORT" \
-  -e SPRING_DATASOURCE_URL="jdbc:postgresql://$POSTGRES:5432/${POSTGRES_DB}" \
+  -e SPRING_DATASOURCE_URL="jdbc:postgresql://${POSTGRES_CONTAINER}:5432/${POSTGRES_DB}" \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD="${POSTGRES_PASSWORD}" \
   -e SPRING_PROFILES_ACTIVE=test \
@@ -88,10 +93,7 @@ echo "$ORDER_RESPONSE" | grep -q '"status":"FILLED"' || { echo "FAIL: order was 
 echo "PASS: order placed and persisted"
 
 echo "== Stage: Verify Data in Postgres =="
-docker exec -e PGPASSWORD="${POSTGRES_PASSWORD}" "$POSTGRES" psql -U postgres -d "${POSTGRES_DB}" -c \
+docker exec -e PGPASSWORD="${POSTGRES_PASSWORD}" "$POSTGRES_CONTAINER" psql -U postgres -d "${POSTGRES_DB}" -c \
   "SELECT account_id, symbol, quantity FROM orders WHERE account_id=1 AND symbol='AAPL';"
-
-echo "== Stage: Application Logs =="
-docker logs "$APP_CONTAINER" 2>&1
 
 echo "== ALL STAGES PASSED =="
