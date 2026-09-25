@@ -4,22 +4,40 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.thecommitcrew.domain.enums.AssetClass;
 import com.thecommitcrew.domain.exception.InstrumentNotFoundException;
 import com.thecommitcrew.domain.validator.BasicInstrumentSymbolValidator;
 import com.thecommitcrew.domain.validator.InstrumentSymbolValidator;
+import com.thecommitcrew.persistence.entity.InstrumentEntity;
+import com.thecommitcrew.persistence.repository.InstrumentRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
+@ExtendWith(MockitoExtension.class)
 public class InstrumentTest {
+
+    @Mock
+    private InstrumentRepository instrumentRepository;
     
     private Instrument instrument;
-    private static final InstrumentSymbolValidator VALIDATOR = new BasicInstrumentSymbolValidator();
+    private InstrumentSymbolValidator validator;
     
     @BeforeEach
     public void setUp() {
-        instrument = new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
+        validator = new BasicInstrumentSymbolValidator(instrumentRepository);
+
+        // Mock valid symbol
+        when(instrumentRepository.findBySymbol("AAPL"))
+            .thenReturn(Optional.of(new InstrumentEntity("AAPL", "Apple Inc.", null, "USD", true)));
+
+        instrument = new Instrument("1", "AAPL", "Apple Inc.", AssetClass.EQUITY, true, validator);
     }
     
     @Test
@@ -41,7 +59,7 @@ public class InstrumentTest {
         @DisplayName("Testing null id")
         public void testConstructor_NullId() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument(null, "AAPL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
+                new Instrument(null, "AAPL", "Apple Inc.", AssetClass.EQUITY, true, validator);
             });
         }
         
@@ -49,7 +67,7 @@ public class InstrumentTest {
         @DisplayName("Testing null name")
         public void testConstructor_NullName() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", null, AssetClass.EQUITY, true, VALIDATOR);
+                new Instrument("1", "AAPL", null, AssetClass.EQUITY, true, validator);
             });
         }
         
@@ -57,7 +75,7 @@ public class InstrumentTest {
         @DisplayName("Testing null asset class")
         public void testConstructor_NullAssetClass() {
             assertThrows(IllegalArgumentException.class, () -> {
-                new Instrument("1", "AAPL", "Apple Inc.", null, true, VALIDATOR);
+                new Instrument("1", "AAPL", "Apple Inc.", null, true, validator);
             });
         }
         
@@ -73,7 +91,7 @@ public class InstrumentTest {
         @DisplayName("Testing invalid symbol")
         public void testConstructor_InvalidSymbol() {
             assertThrows(InstrumentNotFoundException.class, () -> {
-                new Instrument("1", "INVALID_SYMBOL", "Apple Inc.", AssetClass.EQUITY, true, VALIDATOR);
+                new Instrument("1", "INVALID_SYMBOL", "Apple Inc.", AssetClass.EQUITY, true, validator);
             });
         }
     }
@@ -114,7 +132,7 @@ public class InstrumentTest {
         
         @Test
         public void testIsTradableFalse() {
-            Instrument nonTradable = new Instrument("2", "AAPL", "Apple Inc.", AssetClass.EQUITY, false, VALIDATOR);
+            Instrument nonTradable = new Instrument("2", "AAPL", "Apple Inc.", AssetClass.EQUITY, false, validator);
             assertFalse(nonTradable.isTradable());
         }
     }

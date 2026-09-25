@@ -1,10 +1,9 @@
 package com.thecommitcrew.domain.validator;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import com.thecommitcrew.domain.exception.InstrumentNotFoundException;
+import com.thecommitcrew.persistence.repository.InstrumentRepository;
 
 /**
  * Basic Validator - checks if the symbol belongs to the valid symbols set.
@@ -12,18 +11,15 @@ import com.thecommitcrew.domain.exception.InstrumentNotFoundException;
 @Component 
 public class BasicInstrumentSymbolValidator implements InstrumentSymbolValidator {
 
-    private static final Set<String> VALID_SYMBOLS = Set.of(
-        "AAPL",
-        "MSFT",
-        "GOOGL",
-        "US10Y",
-        "VFIAX",
-        "CASH-USD"
-    );
+    private final InstrumentRepository instrumentRepository;
+
+    public BasicInstrumentSymbolValidator(InstrumentRepository instrumentRepository) {
+        this.instrumentRepository = instrumentRepository;
+    }
 
     @Override
     public void validateSymbol(String symbol) {
-        if (!VALID_SYMBOLS.contains(symbol)) {
+        if (!instrumentRepository.findBySymbol(symbol).isPresent()) {
             throw new InstrumentNotFoundException(symbol + " is not a valid instrument symbol");
         }
     }
