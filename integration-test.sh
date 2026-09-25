@@ -4,7 +4,7 @@ set -euo pipefail
 # Accept image name from Jenkins (e.g., the-commit-crew:42)
 APP_IMAGE="${1:-the-commit-crew:latest}"
 ENV=${2:-dev}
-ENV_FILE=".env.${ENV}"
+ENV_FILE="${3:-.env.${ENV}}"  # Use parameter if provided, otherwise look locally
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "ERROR: $ENV_FILE not found"
