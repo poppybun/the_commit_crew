@@ -41,6 +41,10 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
+networks:
+  default:
+    name: the-commit-crew_default
+    
 volumes:
   db_data:
     # Named volume: persists Postgres data across 'docker compose down' and
