@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn -B clean package -f app/pom.xml'
+                sh 'mvn -B clean package'
             }
         }
         stage('Build Image') {
