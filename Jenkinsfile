@@ -157,7 +157,6 @@ pipeline {
                 sh '''
                     CONTAINER_ID=$(docker run -d \
                         -p 8081:8081 \
-                        -e JWT_SECRET="test-secret-for-smoke-test" \
                         --network=the-commit-crew_default \
                         the-commit-crew:${BUILD_NUMBER})
                     
