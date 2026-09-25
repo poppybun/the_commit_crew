@@ -28,6 +28,19 @@ echo "Using postgres container: $POSTGRES_CONTAINER"
 # Ensure postgres container is on the network
 if docker ps --filter "name=${POSTGRES_CONTAINER}" --quiet >/dev/null 2>&1; then
   docker network connect "$NETWORK" "$POSTGRES_CONTAINER" 2>/dev/null || true
+  
+  # Wait for postgres to be ready
+  echo "== Waiting for Postgres to be ready =="
+  for i in $(seq 1 30); do
+    if docker exec "$POSTGRES_CONTAINER" pg_isready -U postgres >/dev/null 2>&1; then
+      echo "Postgres is ready"
+      break
+    fi
+    if [ $i -lt 30 ]; then
+      echo "Waiting for postgres... (attempt $i/30)"
+      sleep 1
+    fi
+  done
 fi
 
 cleanup() {
@@ -37,7 +50,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "== Stage: Run Container =="
-docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:8080" \
+docker run -d --name "$APP_CONTAINER" --network "$NETWORK" -p "$APP_PORT:$APP_PORT" \
   -e SPRING_DATASOURCE_URL="jdbc:postgresql://${POSTGRES_CONTAINER}:5432/${POSTGRES_DB}" \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD="${POSTGRES_PASSWORD}" \
@@ -59,6 +72,9 @@ for i in $(seq 1 60); do
     sleep 2
   fi
 done
+
+echo "== Stage: Application Logs =="
+docker logs "$APP_CONTAINER" 2>&1 | tail -100
 
 echo "== Stage: Test Account Retrieval =="
 RESPONSE=$(curl -s "http://localhost:$APP_PORT/accounts/1")
@@ -83,9 +99,6 @@ ORDER_RESPONSE=$(curl -s -X POST "http://localhost:$APP_PORT/api/v1/orders" \
   -H "Content-Type: application/json" \
   -d "{\"accountId\":1,\"symbol\":\"AAPL\",\"side\":\"BUY\",\"quantity\":1,\"price\":100.00,\"idempotencyKey\":\"order-$(date +%s%N)\"}")
 echo "Order response: $ORDER_RESPONSE"
-
-echo "== Stage: Application Logs =="
-docker logs "$APP_CONTAINER" 2>&1 | tail -100
 
 echo "$ORDER_RESPONSE" | grep -q '"status":"FILLED"' || { echo "FAIL: order was not created"; exit 1; }
 echo "PASS: order placed and persisted"
