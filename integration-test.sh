@@ -16,24 +16,14 @@ set -a
 source "$ENV_FILE"
 set +a
 
-NETWORK=the-commit-crew_default  # Use the same network as Start Database stage
-# Allow container name to be overridden via environment variable
-POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-commitcrew-dev-db-1}"
+NETWORK=the-commit-crew_default
 APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
 
+# Accept postgres container name from parameter, default to Jenkins container name
+POSTGRES_CONTAINER="${4:-the_commit_crew-db-1}"
+
 echo "Using postgres container: $POSTGRES_CONTAINER"
-
-# Try to use Jenkins network, fallback to creating one locally
-if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
-  echo "== Creating network (running locally) =="
-  docker network create "$NETWORK" >/dev/null 2>&1 || true
-fi
-
-# If postgres container exists, try to connect it to the network
-if docker ps --filter "name=${POSTGRES_CONTAINER}" --quiet >/dev/null 2>&1; then
-  docker network connect "$NETWORK" "$POSTGRES_CONTAINER" >/dev/null 2>&1 || true
-fi
 
 cleanup() {
   echo "== Teardown =="
