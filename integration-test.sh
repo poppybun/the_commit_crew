@@ -21,9 +21,17 @@ APP_CONTAINER=the-commit-crew-app
 APP_PORT=8081
 
 # Accept postgres container name from parameter
-POSTGRES_CONTAINER="${4:-the_commit_crew-db-1}"
+POSTGRES_CONTAINER="${4:-the_commit_crew_db_1}"
 
 echo "Using postgres container: $POSTGRES_CONTAINER"
+
+# Verify postgres container exists
+if ! docker ps --filter "name=${POSTGRES_CONTAINER}" --quiet >/dev/null 2>&1; then
+  echo "ERROR: Postgres container '${POSTGRES_CONTAINER}' not found or not running"
+  echo "Running containers:"
+  docker ps
+  exit 1
+fi
 
 # Get the network postgres is on
 POSTGRES_NETWORK=$(docker inspect "$POSTGRES_CONTAINER" --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
