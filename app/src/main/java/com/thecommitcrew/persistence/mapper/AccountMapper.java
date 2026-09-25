@@ -23,7 +23,7 @@ public class AccountMapper {
         Money cashBalance = new Money(entity.getCashBalance());
         
         return new Account(
-            entity.getId(),
+            Long.parseLong(entity.getAccountId()),
             entity.getHolderName(),
             cashBalance,
             entity.getStatus(),
