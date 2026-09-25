@@ -12,9 +12,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.thecommitcrew.auth.JwtTokenProvider;
 import com.thecommitcrew.domain.enums.AccountStatus;
 import com.thecommitcrew.domain.enums.OrderSide;
 import com.thecommitcrew.domain.enums.OrderStatus;
@@ -31,6 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 @WebMvcTest(AccountController.class)
+@Import(AccountControllerTest.TestSecurityConfig.class)
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("null")
 public class AccountControllerTest {
@@ -40,6 +48,9 @@ public class AccountControllerTest {
 
     @MockBean
     private AccountService accountService;
+
+    @MockBean 
+    private JwtTokenProvider jwtTokenProvider;
 
     private static final Long TEST_ACCOUNT_ID = 1L;
     private static final String TEST_ACCOUNT_HOLDER = "John Doe";
@@ -64,6 +75,11 @@ public class AccountControllerTest {
     @Nested
     @DisplayName("GET /accounts/{id}")
     class GetAccountEndpoint {
+        @BeforeEach
+        void setup() {
+            reset(accountService);
+        }
+
         @Test
         @DisplayName("Returns account successfully when found")
         void returnsAccountWhenFound() throws Exception {
@@ -90,6 +106,11 @@ public class AccountControllerTest {
     @Nested
     @DisplayName("GET /accounts/{id}/balance")
     class GetAccountBalanceEndpoint {
+        @BeforeEach
+        void setup() {
+            reset(accountService);
+        }
+
         @Test
         @DisplayName("Returns balance successfully when account found")
         void returnsBalanceWhenAccountFound() throws Exception {
@@ -117,6 +138,11 @@ public class AccountControllerTest {
     @Nested
     @DisplayName("GET /accounts/{id}/positions")
     class GetAccountPositionsEndpoint {
+        @BeforeEach
+        void setup() {
+            reset(accountService);
+        }
+
         @Test
         @DisplayName("Returns positions successfully when account found")
         void returnsPositionsWhenAccountFound() throws Exception {
@@ -157,6 +183,11 @@ public class AccountControllerTest {
     @Nested
     @DisplayName("GET /accounts/{id}/orders")
     class GetAccountOrdersEndpoint {
+        @BeforeEach
+        void setup() {
+            reset(accountService);
+        }
+
         @Test
         @DisplayName("Returns orders successfully when account found")
         void returnsOrdersWhenAccountFound() throws Exception {
@@ -201,6 +232,23 @@ public class AccountControllerTest {
             mockMvc.perform(get("/accounts/{id}/orders", TEST_ACCOUNT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.empty()));
+        }
+    }
+
+    /**
+     * Test-only security configuration that disables authentication for all requests.
+     */
+    @TestConfiguration
+    @EnableWebSecurity
+    public static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll()
+                );
+            return http.build();
         }
     }
 }

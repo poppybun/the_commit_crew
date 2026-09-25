@@ -10,6 +10,7 @@ import com.thecommitcrew.persistence.mapper.InstrumentMapper;
 import com.thecommitcrew.persistence.mapper.OrderMapper;
 import com.thecommitcrew.persistence.mapper.PositionMapper;
 import com.thecommitcrew.persistence.repository.AccountRepository;
+import com.thecommitcrew.auth.JwtTokenProvider;
 
 @SpringBootTest()
 class MainTests {
@@ -31,6 +32,9 @@ class MainTests {
   
   @MockBean
   private InstrumentMapper instrumentMapper;
+
+  @MockBean
+  private JwtTokenProvider jwtTokenProvider;
 
   @Test
   void contextLoads() {
